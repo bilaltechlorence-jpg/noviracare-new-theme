@@ -1,0 +1,130 @@
+{% assign question_one = product.metafields.custom.question_1 %}
+{% assign answer_one = product.metafields.custom.answer_1 %}
+{% assign question_two = product.metafields.custom.question_2 %}
+{% assign answer_two = product.metafields.custom.answer_2 %}
+{% assign question_three = product.metafields.custom.question_3 %}
+{% assign answer_three = product.metafields.custom.answer_3 %}
+{% assign question_four = product.metafields.custom.question_4 %}
+{% assign answer_four = product.metafields.custom.answer_4 %}
+{% assign question_five = product.metafields.custom.question_5 %}
+{% assign answer_five = product.metafields.custom.answer_5 %}
+
+{% if question_one != blank %}
+  <div class="custom_faqs_main" style="background-color:{{ section.settings.bg }}">
+    <div class="container">
+      {% if section.settings.head %}
+        <h1>{{ section.settings.head }}</h1>
+      {% endif %}
+      <div class="custom_faqs_inner">
+        {% if question_one and answer_one %}
+          <div class="faq-item">
+            <div class="faq-question">
+              <div class="faq_item__question">
+                {% render 'question-mark-icon' %}
+                {{ question_one }}
+              </div>
+              <span class="faq-icon">
+                {% render 'icon-chevron' %}
+              </span>
+            </div>
+            <div class="faq-answer">
+              {{ answer_one }}
+            </div>
+          </div>
+        {% endif %}
+        {% if question_two and answer_two %}
+          <div class="faq-item">
+            <div class="faq-question">
+              <div class="faq_item__question">
+                {% render 'question-mark-icon' %}
+                {{ question_two }}
+              </div>
+              <span class="faq-icon">
+                {% render 'icon-chevron' %}
+              </span>
+            </div>
+            <div class="faq-answer">
+              {{ answer_two }}
+            </div>
+          </div>
+        {% endif %}
+
+        {% if question_three and answer_three %}
+          <div class="faq-item">
+            <div class="faq-question">
+              <div class="faq_item__question">
+                {% render 'question-mark-icon' %}
+                {{ question_three }}
+              </div>
+              <span class="faq-icon">
+                {% render 'icon-chevron' %}
+              </span>
+            </div>
+            <div class="faq-answer">
+              {{ answer_three }}
+            </div>
+          </div>
+        {% endif %}
+        {% if question_four and answer_four %}
+          <div class="faq-item">
+            <div class="faq-question">
+              <div class="faq_item__question">
+                {% render 'question-mark-icon' %}
+                {{ question_four }}
+              </div>
+              <span class="faq-icon">
+                {% render 'icon-chevron' %}
+              </span>
+            </div>
+            <div class="faq-answer">
+              {{ answer_four }}
+            </div>
+          </div>
+        {% endif %}
+
+        {% if question_five and answer_five %}
+          <div class="faq-item">
+            <div class="faq-question">
+              <div class="faq_item__question">
+                {% render 'question-mark-icon' %}
+                {{ question_five }}
+              </div>
+              <span class="faq-icon">
+                {% render 'icon-chevron' %}
+              </span>
+            </div>
+            <div class="faq-answer">
+              {{ answer_five }}
+            </div>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+{% endif %}
+{% schema %}
+{
+  "name": "Custom Faqs",
+  "settings": [
+    {
+      "type": "color",
+      "label": "Background Color",
+      "id": "bg"
+    },
+    {
+      "type": "text",
+      "label": "Heading",
+      "id": "head"
+    }
+  ]
+}
+{% endschema %}
+
+<script>
+  document.querySelectorAll('.faq-question').forEach((item) => {
+    item.addEventListener('click', () => {
+      const parent = item.parentElement;
+      parent.classList.toggle('open');
+    });
+  });
+</script>

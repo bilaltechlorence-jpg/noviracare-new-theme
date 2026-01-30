@@ -1,0 +1,219 @@
+
+/*---------------- Global Custom CSS -------------------*/
+h1.product_title.entry-title {
+    font-size: 28px !important;
+}
+#price_ppr {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-family: sans-serif;
+}
+
+#price_ppr del {
+  color: #999;
+  text-decoration: line-through;
+  font-size: 16px;
+  order: 1; /* move to right */
+}
+
+#price_ppr ins {
+  font-weight: bold;
+  color: #f08080;
+  font-size: 18px;
+  text-decoration: none;
+  order: 2; /* move to left */
+}
+
+#price_ppr::after {
+  content: "SAVE $30"; /* manually write saving */
+  font-size: 13px;
+  color:	#f08080);
+  border: 1px solid 	#f08080;
+  padding: 2px 8px;
+  border-radius: 50px;
+  font-weight: bold;
+  margin-left: 10px;
+  order: 3;
+}
+
+
+/* Main container styling */
+#pricefeatured_product_MiYbaQ {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: sans-serif;
+}
+
+/* Discounted Price - should appear first */
+#pricefeatured_product_MiYbaQ ins {
+  order: 2;
+  font-size: 18px;
+  font-weight: bold;
+  color: #f08080;
+  text-decoration: none;
+
+}
+
+/* Original Price - strike through */
+#pricefeatured_product_MiYbaQ del {
+  order: 1;
+  font-size: 16px;
+  color: #999;
+  text-decoration: line-through;
+}
+
+/* Save Box */
+#pricefeatured_product_MiYbaQ::after {
+  content: "SAVE $30"; /* <-- Change manually if needed */
+  order: 3;
+  font-size: 13px;
+  font-weight: bold;
+  color: #f08080;
+  border: 1px solid #f08080;
+  padding: 2px 8px;
+  border-radius: 50px;
+  margin-left: 5px;
+}
+
+
+document.querySelectorAll("body div").forEach(el => {
+  el.style.setProperty("overflow", "hidden", "important");
+});
+
+.sticky_prepared{
+  height: 70px !important;
+}
+
+.header__mid {
+    position: unset !important;
+    width: 100%!important;
+    background: #fff!important;
+}
+
+#ntheader.sticky_prepared.live_stuck .ntheader_wrapper {
+  -webkit-animation: .6s animate_sticky !important;
+  animation: .6s animate_sticky !important;
+}
+
+#ntheader.live_stuck .logo_normal{
+  transform: translate(120%, -35%) scale(.1) rotate(300deg) !important;
+  display: block;
+  opacity: 0;
+}
+
+
+.logo_normal {
+  position: absolute;
+  top: 50%;
+  left: 0%;  
+  transform: translate(0%, -50%);
+  transition: 1s;
+  z-index: 3;
+  opacity: 1;
+  display: block;
+}
+
+/* end header */
+
+.nt_action .tcount, .toolbar_count {
+    background-color: #f08080;
+    color: #fff;
+    box-shadow: unset;
+}
+
+.nt_menu .sub-menu .sub-column-item {
+  padding: 10px 15px;
+  max-width: 100%;
+}
+
+.cus.sub-menu.calc_pos {
+  max-height: 30vh;
+  overflow: hidden;
+}
+
+
+/*---------------- Custom CSS for only desktop -------------------*/
+@media (min-width: 1025px) {
+  
+}
+
+/*---------------- Custom CSS for tablet, mobile -------------------*/
+@media (max-width: 1024px) {
+  
+  .logo_normal {
+    display: none;
+  }
+
+  /* for category off on mobile */
+  
+  .mb_nav_tabs .mb_nav_title:nth-child(2){
+    display: none;
+  }
+
+  .mb_cat_true .mb_nav_title {
+    -ms-flex: 0 0 50%;
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+
+  /* for category off on mobile close */
+  
+}
+
+/*---------------- Custom CSS for only tablet -------------------*/
+@media (min-width: 768px) and (max-width: 1024px) {
+  
+}
+
+/*---------------- Custom CSS for only mobile -------------------*/
+@media (max-width: 767px){
+  div#nt_countdow_ppr_txt {
+    width: 300px;
+    border: solid 2px #f08080;
+    border-radius: 10px;
+}
+  #nt_countdow_ppr_txt .nt_countdow_page {
+    padding-bottom: 15px;
+    padding: 0px 20px  20px;
+}
+}
+
+
+
+
+
+
+
+#price_ppr:after {
+    content: "40% OFF Today Only";
+    font-size: 13px;
+    color: #f08080);
+    border: 1px solid #f08080;
+    padding: 2px 8px;
+    border-radius: 50px;
+    font-weight: 700;
+    margin-left: 10px;
+    order: 3;
+}
+
+html, body {
+    overflow-x: hidden !important;
+}
+html, body {
+    overflow-y: auto !important;
+}
+html.yes-js.clvideo.clcsspositionsticky.clno-touchevents.clhovermq.browser-Chrome.platform-Windows {
+    margin: 0px !important;
+}
+
+
+
+.theiaStickySidebar,
+.row.theiaStickySidebar,
+.row.theiaStickySidebar.ok {
+    position: static !important;
+    top: auto !important;
+    transform: none !important;
+}

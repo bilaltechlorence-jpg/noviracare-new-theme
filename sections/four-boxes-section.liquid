@@ -1,0 +1,138 @@
+
+{%- assign img1 = product.metafields.custom.four_boxes_first_image -%}
+{%- assign title1 = product.metafields.custom.four_boxes_first_title -%}
+{%- assign content1 = product.metafields.custom.four_boxes_first_content -%}
+
+{%- assign img2 = product.metafields.custom.four_boxes_second_image -%}
+{%- assign title2 = product.metafields.custom.four_boxes_second_title -%}
+{%- assign content2 = product.metafields.custom.four_boxes_second_content -%}
+
+{%- assign img3 = product.metafields.custom.four_boxes_third_image -%}
+{%- assign title3 = product.metafields.custom.four_boxes_third_title -%}
+{%- assign content3 = product.metafields.custom.four_boxes_third_content -%}
+
+{%- assign img4 = product.metafields.custom.four_boxes_fourth_image -%}
+{%- assign title4 = product.metafields.custom.four_boxes_fourth_title -%}
+{%- assign content4 = product.metafields.custom.four_boxes_fourth_content -%}
+
+{%- assign section_title = product.metafields.custom.car_section_title -%}
+
+{% if img1 != blank
+  and title1 != blank
+  and content1 != blank
+  and img2 != blank
+  and title2 != blank
+  and content2 != blank
+  and img3 != blank
+  and title3 != blank
+  and content3 != blank
+  and img4 != blank
+  and title4 != blank
+  and content4 != blank
+  and section_title != blank
+%}
+  <div class="custom_four_boxes_section" style="background-image:url({{ section.settings.bg_img | img_url: '' }})">
+    <h3>{{ section_title }}</h3>
+    <div class="container">
+      {% if img1 and title1 and content1 %}
+        <div class="four_boxes first_box">
+          {% if img1 %}
+            <div class="four_boxes_section_img">
+              <img src="{{ img1 | file_url }}">
+            </div>
+          {% endif %}
+          {% if title1 or content1 %}
+            <div class="four_boxes_content">
+              {% if title1 %}
+                <h2>{{ title1 }}</h2>
+              {% endif %}
+              {% if content1 %}
+                <div class="four_boxes_content_inner">
+                  {{ content1 }}
+                </div>
+              {% endif %}
+            </div>
+          {% endif %}
+        </div>
+      {% endif %}
+
+      {% if img2 and title2 and content2 %}
+        <div class="four_boxes second_box">
+          {% if img2 %}
+            <div class="four_boxes_section_img">
+              <img src="{{ img2 | file_url }}">
+            </div>
+          {% endif %}
+          {% if title2 or content2 %}
+            <div class="four_boxes_content">
+              {% if title2 %}
+                <h2>{{ title2 }}</h2>
+              {% endif %}
+              {% if content2 %}
+                <div class="four_boxes_content_inner">
+                  {{ content2 }}
+                </div>
+              {% endif %}
+            </div>
+          {% endif %}
+        </div>
+      {% endif %}
+
+      {% if img3 and title3 and content3 %}
+        <div class="four_boxes third_box">
+          {% if img3 %}
+            <div class="four_boxes_section_img">
+              <img src="{{ img3 | file_url }}">
+            </div>
+          {% endif %}
+          {% if title3 or content3 %}
+            <div class="four_boxes_content">
+              {% if title3 %}
+                <h2>{{ title3 }}</h2>
+              {% endif %}
+              {% if content3 %}
+                <div class="four_boxes_content_inner">
+                  {{ content3 }}
+                </div>
+              {% endif %}
+            </div>
+          {% endif %}
+        </div>
+      {% endif %}
+
+      {% if img4 and title4 and content4 %}
+        <div class="four_boxes fourth_box">
+          {% if img4 %}
+            <div class="four_boxes_section_img">
+              <img src="{{ img4 | file_url }}">
+            </div>
+          {% endif %}
+          {% if title4 or content4 %}
+            <div class="four_boxes_content">
+              {% if title4 %}
+                <h2>{{ title4 }}</h2>
+              {% endif %}
+              {% if content4 %}
+                <div class="four_boxes_content_inner">
+                  {{ content4 }}
+                </div>
+              {% endif %}
+            </div>
+          {% endif %}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+{% endif %}
+{% schema %}
+{
+  "name": "Four Boxes Section",
+  "settings": [
+    {
+      "type": "image_picker",
+      "label": "Background Image",
+      "id": "bg_img"
+    }
+  ]
+}
+{% endschema %}

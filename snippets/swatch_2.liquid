@@ -1,0 +1,314 @@
+{%- liquid
+  assign color_ck = settings.color_ck | append: ',color,colors,couleur,colour'
+  assign get_color = color_ck | downcase | replace: ' ,', ',' | replace: ', ', ',' | split: ',' | uniq
+  assign size = product.options_with_values.size
+  assign ck = true
+  assign has_img = block.settings.swatch_style | default: settings.swatch_style
+  if product.tags contains 'sw_imgt4_on'
+    assign has_img = '2'
+  endif
+  if product.available
+    assign remove_soldout = settings.remove_sold_out
+  else
+    assign remove_soldout = false
+  endif
+  
+  
+  assign select_id = 'nt_select' | append: call_cl
+  assign select_class = 'nt_select' | append: call_cl
+  assign bclass = 'is-selected-none'
+  assign pr_variants = product.variants
+  assign selected_variant = product.selected_variant
+
+  case settings.pr_curent
+    when '1'
+      assign current_variant = selected_variant
+      if current_variant != blank
+        assign bclass = 'is-selected-nt'
+      endif
+
+    when '2'
+      assign current_variant = selected_variant | default: pr_variants[1]
+      assign bclass = 'is-selected-nt'
+      if current_variant.available == false and remove_soldout and product.available
+        assign current_variant = product.first_available_variant
+      endif
+
+    else
+      assign current_variant = pr_variants[1]
+      assign bclass = 'is-selected-nt'
+  endcase
+
+  if pr_variants.size == 1
+    assign current_variant = pr_variants.first
+    assign bclass = 'is-selected'
+  endif
+
+  assign choose_an_option = 'products.product.choose_an_option' | t
+  assign img_variants = pr_variants | where: 'featured_image'
+-%}
+
+
+
+<div class="cstm fimg_{{settings.use_fimg}} variations mb__40 style__circle size_{{block.settings.swatch_size | default:settings.swatch_size }} style_color des_color_{{block.settings.style_color | default:settings.style_color }} remove_soldout_{{remove_soldout}}">
+  {%- for option in product.options_with_values -%}
+    {%- assign option_handle = option.name | handleize -%}
+    {%- assign name = option.name | downcase -%}
+    {%- assign svc = '' -%}
+    {%- assign option_index = forloop.index0 -%}
+    {%- assign color_class = '' -%}
+    {%- case option_index -%}
+      {%- when 0 -%}
+        {%- assign selected_value = current_variant.option1 | default: choose_an_option -%}
+      {%- when 1 -%}
+        {%- assign selected_value = current_variant.option2 | default: choose_an_option -%}
+      {%- else -%}
+        {%- assign selected_value = current_variant.option3 | default: choose_an_option -%}
+    {%- endcase -%}
+    {%- if get_color contains name -%}
+      {%- if ck and has_img == '2' and img_variants.size > 0 -%}
+        {%- assign color_class = 'fimg_ratio' -%}
+        <div
+          class="lazypreload nt_pre_img op__0"
+          data-include="{% if se_id != blank %}{{routes.search_url}}/?section_id={{se_id}}{% else %}{{locale_url}}/products/{{product.handle}}/?view=cl{{call_cl}}{% endif %}"
+        ></div>
+        {%- assign ck = false -%}
+      {%- endif -%}
+      <div
+        data-opname="{{option.name | handleize}}"
+        class="{{select_class}}{{ option_index }} {{color_class}} swatch is-color{% cycle ' is-ntcolor','','' %}"
+        id="{{select_id}}_{{ option_index }}"
+      >
+        <h4 class="swatch__title">
+          {{ option.name }}: <span class="nt_name_current">{{ selected_value }}</span>
+        </h4>
+        <ul class="swatches-select swatch__list_pr" data-id="{{ option_index }}" data-size="{{size}}">
+          {%- for value in option.values -%}
+            {%- assign vh = value | handle -%}
+            {%- assign sclass = '' -%}
+            {%- if selected_value == value -%}{%- assign sclass = bclass -%}{%- endif -%}
+            <li
+              data-swatch-itemt4
+              data-index="{{ forloop.index0 }}"
+              data-value="{{ vh }}"
+              class="ttip_nt tooltip_top{%- if forloop.first == true -%}_right{%- endif %} nt-swatch swatch_pr_item bg_css_{{ vh }} {{sclass}}"
+              data-escape="{{ value | escape }}"
+            >
+              <span class="tt_txt">{{ value }}</span
+              ><span class="swatch__value_pr pr bg_color_{{ vh }} lazyload"></span>
+            </li>
+          {%- endfor -%}
+        </ul>
+      </div>
+    {%- elsif option_handle == 'bundle-save' -%}
+      <!-- Custom design for Bundle & Save swatches -->
+      <div
+        data-opname="{{option_handle}}"
+        class="{{select_class}}{{ option_index }} swatch is-bundle-save custom-bundle-swatch"
+        id="{{select_id}}_{{ option_index }}"
+      >
+        <h4 class="swatch__title">
+          {{ option.name }}: <span class="nt_name_current">{{ selected_value }}</span>
+        </h4>
+        <ul class="swatches-select swatch__list_pr bundle-save-list" data-id="{{ option_index }}" data-size="{{size}}">
+          {%- for value in option.values -%}
+            {%- assign vh = value | handle -%}
+            {%- assign sclass = '' -%}
+            {%- if selected_value == value -%}{%- assign sclass = bclass -%}{%- endif -%}
+            {%- assign current_variantt = product.variants | where: 'option2', value | first -%}
+            <li
+              data-swatch-itemt4
+              data-index="{{ forloop.index0 }}"
+              data-value="{{ vh }}"
+              class="nt-swatch swatch_pr_item bundle-save-item {{sclass}}"
+              data-escape="{{ value | escape }}"
+            >
+              <!-- Custom image per option value -->
+<div class="bundle-save-img">
+  {% assign variant = product.variants[forloop.index0] %}
+  <img
+    src="{{ variant.image | default: product.featured_image | img_url: '200x' }}"
+    alt="{{ variant.title }}"
+    loading="lazy"
+  >
+</div>
+
+              <span class="swatch__value_pr">
+                {{ value }}
+                <i>
+                  {%- if current_variantt.compare_at_price
+                    and current_variantt.compare_at_price > current_variantt.price
+                  -%}
+                    {% assign saved_amount = current_variantt.compare_at_price | minus: current_variantt.price %}
+                    Save {{ saved_amount | money }}
+                  {%- endif -%}
+                </i>
+              </span>
+              {%- if current_variantt and current_variantt.price -%}
+                <div class="bundle_price">
+                  {%- if current_variantt.compare_at_price
+                    and current_variantt.compare_at_price > current_variantt.price
+                  -%}
+                    <span class="compare-price">{{ current_variantt.compare_at_price | money }}</span>
+                  {%- endif -%}
+                  <span class="actual-price">{{ current_variantt.price | money }}</span>
+                </div>
+              {%- endif -%}
+            </li>
+          {%- endfor -%}
+        </ul>
+      </div>
+    {%- else -%}
+      <div
+        data-opname="{{option.name | handleize}}"
+        class="{{select_class}}{{ option_index }} swatch is-label is-{{option.name | handleize}}"
+        id="{{select_id}}_{{ option_index }}"
+      >
+        <h4 class="swatch__title">
+          {{ option.name }}: <span class="nt_name_current">{{ selected_value }}</span>
+        </h4>
+        <ul class="swatches-select swatch__list_pr" data-id="{{ option_index }}" data-size="{{size}}">
+          {%- for value in option.values -%}
+            {%- assign vh = value | handle -%}
+            {%- assign sclass = '' -%}
+            {%- if selected_value == value -%}{%- assign sclass = bclass -%}{%- endif -%}
+            <li
+              data-swatch-itemt4
+              data-index="{{ forloop.index0 }}"
+              data-value="{{ vh }}"
+              class="nt-swatch swatch_pr_item pr bg_css_{{ vh }} {{sclass}}"
+              data-escape="{{ value | escape }}"
+            >
+              <span class="swatch__value_pr">{{ value }}</span>
+            </li>
+          {%- endfor -%}
+        </ul>
+      </div>
+    {%- endif -%}
+  {%- endfor -%}
+</div>
+<style>
+              ul.swatches-select.swatch__list_pr.bundle-save-list {
+                display: flex;
+                flex-direction: column;
+                max-width:80%
+            }
+          ul.swatches-select.swatch__list_pr.bundle-save-list span.swatch__value_pr {
+              width: 100%;
+              max-width: 50%;
+              display: flex;
+              font-weight: 800;
+              color: #056d4a;
+                flex-direction: column;
+            align-items: start;
+          }
+        ul.swatches-select.swatch__list_pr.bundle-save-list span.swatch__value_pr i {
+                font-style: normal;
+      font-weight: 600;
+      color: red;
+        }
+    ul.swatches-select.swatch__list_pr.bundle-save-list li:nth-child(2):after {
+      content: "BEST SELLER";
+    background: #0d4d37;
+    color: #fff;
+    position: absolute;
+    max-width: 65px;
+    line-height: 15px;
+    text-align: center;
+    justify-content: center;
+    height: 60px;
+    align-items: center;
+    display: flex;
+    right: -17px;
+    font-weight: 800;
+    clip-path: polygon(100% 50%, 93.15% 58.58%, 96.19% 69.13%, 86.58% 74.45%, 85.36% 85.36%, 74.45% 86.58%, 69.13% 96.19%, 58.58% 93.15%, 50% 100%, 41.42% 93.15%, 30.87% 96.19%, 25.55% 86.58%, 14.64% 85.36%, 13.42% 74.45%, 3.81% 69.13%, 6.85% 58.58%, 0 50%, 6.85% 41.42%, 3.81% 30.87%, 13.42% 25.55%, 14.64% 14.64%, 25.55% 13.42%, 30.87% 3.81%, 41.42% 6.85%, 50% 0, 58.58% 6.85%, 69.13% 3.81%, 74.45% 13.42%, 85.36% 14.64%, 86.58% 25.55%, 96.19% 30.87%, 93.15% 41.42%);
+    font-size: 12px;
+    top: -40px;
+    padding: 3px 10px;
+    transform: rotate(347deg);
+    border-radius: 3px;
+  }
+  {% comment %} ul.swatches-select.swatch__list_pr.bundle-save-list li:nth-child(3):after {
+      content: "FLASH SALE!";
+    background: #0d4d37;
+    color: #fff;
+    position: absolute;
+    right: -17px;
+    font-weight: 800;
+    font-size: 12px;
+    top: -15px;
+    padding: 3px 10px;
+    transform: rotate(10deg);
+    border-radius: 3px;
+  } {% endcomment %}
+
+  ul.swatches-select.swatch__list_pr.bundle-save-list li:nth-child(2) {
+      margin-top: 20px;
+      position: relative;
+  }
+  ul.swatches-select.swatch__list_pr.bundle-save-list li:nth-child(3) {
+      margin-top: 20px;
+      position: relative;
+  }
+          .bundle_price {
+              width: 100%;
+              display: flex;
+              justify-content: end;
+              flex-direction: column-reverse;
+              align-items: end;
+          }
+
+          .bundle_price span.actual-price {
+              font-size: 18px;
+              font-weight: 700;
+          }
+
+          .bundle_price span.compare-price {
+              font-weight: 600;
+              text-decoration: line-through;
+          }
+
+          .custom-bundle-swatch h4.swatch__title {
+              text-align: center;
+              max-width: 80%;
+              position: relative;
+              margin-top: 20px;
+              background: #fff;
+          }
+
+          .custom-bundle-swatch h4.swatch__title:before {
+              content: "";
+              width: 100%;
+              height: 2px;
+              background: green;
+              display: block;
+              position: absolute;
+              top: 8px;
+              z-index: -1;
+          }
+            ul.swatches-select.swatch__list_pr.bundle-save-list li {
+                    display: flex;
+              gap: 10px;
+              align-items: center;
+              background: #fff;
+              padding: 10px;
+              border: 2px solid #f08080;
+              border-radius: 10px;
+            }ul.swatches-select.swatch__list_pr.bundle-save-list li.is-selected {
+          background: #dcede8;
+      }
+
+            ul.swatches-select.swatch__list_pr.bundle-save-list li .bundle-save-img img {
+                width: 100%;
+                  border-radius: 10px;
+            }
+
+            ul.swatches-select.swatch__list_pr.bundle-save-list li .bundle-save-img {
+                max-width: 60px;
+            }
+      @media(max-width:992px){
+        ul.swatches-select.swatch__list_pr.bundle-save-list {
+        max-width: 100%;
+    }
+      }
+</style>

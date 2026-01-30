@@ -1,0 +1,2793 @@
+{%- liquid
+  assign no_sold_out = product.available
+  if no_sold_out
+    assign remove_soldout = settings.remove_sold_out
+  else
+    assign remove_soldout = false
+  endif
+  assign pr_variants = product.variants
+  assign variants_size = pr_variants.size
+  assign selected_variant = product.selected_variant
+  assign pr_curent = settings.pr_curent
+  if pr_curent == '2'
+    assign current_variant = selected_variant | default: pr_variants.first
+    if remove_soldout and current_variant.available == false and no_sold_out
+      assign current_variant = product.first_available_variant
+    endif
+  else
+    assign current_variant = product.selected_or_first_available_variant
+  endif
+  assign default = product.has_only_default_variant
+  assign on_sale = false
+  if current_variant.compare_at_price > current_variant.price
+    assign on_sale = true
+  endif
+  assign ck_external = false
+  assign pr_metafields = product.metafields
+  assign pr_metafields_meta = pr_metafields.meta
+  assign external = pr_metafields.external
+  assign on_link = external.on_link
+  if on_link != blank
+    assign ck_external = true
+    assign title = on_link | split: '|||' | first | strip
+    assign link = on_link | split: '|||' | last | strip
+  elsif external != blank
+    assign ck_external = true
+    assign title = external | first | first
+    assign link = external | first | last
+  endif
+  assign ck_inventory = settings.ck_inventory
+  if template.suffix == 'quick_view'
+    assign call_cl = '_qv'
+    assign Isquickview = true
+  else
+    assign call_cl = '_ppr'
+    assign Isquickview = false
+  endif
+  assign des_pr_layout = settings.des_pr_layout
+  assign pr_incoming_mess = settings.pr_incoming_mess
+  assign pid = product.id
+  assign hd_up = 'group-' | append: pid
+  assign nav_up = linklists[hd_up].links | where: 'type', 'product_link'
+  assign nav_up_size = nav_up.size
+  assign price_varies = product.price_varies | default: product.compare_at_price_varies
+  assign pr_tags = product.tags
+  assign style_tag_arr = pr_tags | where: 'stylet4_'
+  assign style_tag = style_tag_arr | first | remove: 'stylet4_'
+  assign nav_style = linklists[style_tag].links | where: 'type', 'product_link'
+  assign nav_style_size = nav_style.size
+
+  assign inventory_quantity = current_variant.inventory_quantity
+  assign inventory_management = current_variant.inventory_management
+  if inventory_quantity <= 0 and inventory_management == 'shopify'
+    assign classdn1 = 'dn'
+    assign classdn2 = ''
+    assign ck_preoder = true
+  else
+    assign classdn1 = ''
+    assign classdn2 = 'dn'
+    assign ck_preoder = false
+  endif
+  assign PR_no_pick = false
+  if pr_curent == '1' and variants_size > 1 and selected_variant == blank
+    assign PR_no_pick = true
+  endif
+  assign locale_url = product.url | split: '/products/' | first
+-%}
+
+{%- for block in section.blocks -%}
+  {%- assign bk_stts = block.settings -%}
+  {%- case block.type -%}
+    {%- when 'title' -%}
+      {%- unless Isquickview -%}
+        <h1 class="product_title entry-title" style="font-size: {{bk_stts.size}}px">{{ product.title }}</h1>
+        <!-- Start of Judge.me code -->
+        <div class="jdgm-widget jdgm-preview-badge" data-id="{{ product.id }}">
+          {{ product.metafields.judgeme.badge }}
+        </div>
+        <!-- End of Judge.me code -->
+      {%- else -%}
+        <h1 class="product_title entry-title" style="font-size: {{bk_stts.size}}px">
+          <a href="{{product.url | within: collection}}">{{ product.title }}</a>
+        </h1>
+        <!-- Start of Judge.me code -->
+        <div class="jdgm-widget jdgm-preview-badge" data-id="{{ product.id }}">
+          {{ product.metafields.judgeme.badge }}
+        </div>
+        <!-- End of Judge.me code -->
+      {%- endunless -%}
+    {%- when 'pricereview' -%}
+      <div class="flex wrap fl_between al_center price-review">
+        <p class="price_range" id="price{{call_cl}}">
+          {%- if nav_up_size == 0 and current_variant.unit_price_measurement -%}
+            {%- if price_varies -%}<span class="price_varies">{%- endif -%}
+            {%- if on_sale -%}
+              <del>{{ current_variant.compare_at_price | money }}</del><ins>{{ current_variant.price | money }}</ins>
+            {%- else -%}
+              {{ current_variant.price | money }}
+            {%- endif -%}
+            {%- if price_varies -%}</span>{%- endif -%}
+            {%- capture unit_price_base_unit -%}
+                <span class="unit_base">
+                  {%- if current_variant.unit_price_measurement -%}
+                    {%- if current_variant.unit_price_measurement.reference_value != 1 -%}
+                      {{- current_variant.unit_price_measurement.reference_value -}}
+                    {%- endif -%}
+                    {{ current_variant.unit_price_measurement.reference_unit }}
+                  {%- endif -%}
+                </span>
+               {%- endcapture -%}
+            <span class="price__unit db"
+              ><span class="unit_price">{{ current_variant.unit_price | money }}</span><span>/</span>
+              {{- unit_price_base_unit -}}
+            </span>
+          {%- elsif nav_up_size == 0 -%}
+            {%- if price_varies -%}
+              {%- if bk_stts.price == '1' -%}
+                {{ product.price_min | money }} – {{ product.price_max | money }}
+              {%- elsif bk_stts.price == '2' -%}
+                <span class="cb fwn">{{ 'products.product.from' | t }}</span> {{ product.price_min | money }}
+              {%- else -%}
+                {%- if on_sale -%}
+                  <span class="price_varies current_price"
+                    ><del>{{ current_variant.compare_at_price | money }}</del>
+                    <ins>{{ current_variant.price | money }}</ins></span
+                  >
+                  <style>
+                    .nt_cart_form .price {display: none}
+                  </style>
+                {%- else -%}
+                  <span class="price_varies current_price">{{ current_variant.price | money }}</span>
+                  <style type="text/css">
+                    .nt_cart_form .price {display: none}
+                  </style>
+                {%- endif -%}
+              {%- endif -%}
+            {%- elsif on_sale -%}
+              <del>{{ current_variant.compare_at_price | money }}</del> <ins>{{ current_variant.price | money }}</ins>
+            {%- else -%}
+              {{ current_variant.price | money }}
+            {%- endif -%}
+
+          {%- else -%}
+            {%- if on_sale -%}
+              {{ product.price | money }}–{{ product.compare_at_price | money }}
+            {%- else -%}
+              {{ product.price | money }}
+            {%- endif -%}
+          {%- endif -%}
+        </p>
+        {%- if bk_stts.rating -%}
+          <a href="#tab_pr_reivew" class="rating_sp_kl dib{% if Isquickview %} pe_none{% endif %}">
+            {%- case settings.app_review -%}
+              {%- when '1' -%}
+                <span class="shopify-product-reviews-badge" data-id="{{ pid }}"></span>
+              {%- when '2' -%}
+                {%- if Isquickview -%}
+                  <div class="ryviu-collection star-rating">
+                    <ryviu-widget-total
+                      collection="1"
+                      reviews_data="{{pr_metafields.ryviu.product_reviews_info  | escape  }}"
+                      product_id="{{product.id}}"
+                      handle="{{product.handle}}"
+                    ></ryviu-widget-total>
+                  </div>
+                {%- else -%}
+                  <div class="review-widget">
+                    <ryviu-widget-total
+                      reviews_data="{{pr_metafields.ryviu.product_reviews_info  | escape  }}"
+                      product_id="{{pid}}"
+                      handle="{{product.handle}}"
+                    ></ryviu-widget-total>
+                  </div>
+                {%- endif -%}
+              {%- when '3' -%}
+                {%- if Isquickview -%}
+                  <div product-id="{{ pid }}" class="arv-collection arv-collection--{{ pid }}"></div>
+                {%- else -%}
+                  <div product-id="{{ pid }}" class="alr-display-review-badge"></div>
+                {%- endif -%}
+              {%- when '4' -%}
+                <div
+                  class="loox-rating"
+                  data-id="{{ pid }}"
+                  data-rating="{{ pr_metafields.loox.avg_rating }}"
+                  data-raters="{{ pr_metafields.loox.num_reviews }}"
+                ></div>
+              {%- when '5' -%}
+                {%- capture the_snippet_review_avg %}{% render 'ssw-widget-avg-rate-profile' %}{% endcapture -%}
+                {%- unless the_snippet_review_avg contains 'Liquid error' %}{{ the_snippet_review_avg }}{% endunless -%}
+              {%- else -%}
+                <div class="pr_rating">{%- render 'review_pr_other' -%}</div>
+            {%- endcase -%}
+          </a>
+        {%- endif -%}
+      </div>
+      {%- if cart.taxes_included or shop.shipping_policy.body != blank -%}
+        <div class="product__policies rte cb" data-product-policies>
+          {%- if cart.taxes_included -%}
+            {{ 'products.product.include_taxes' | t }}
+          {%- endif -%}
+          {%- if shop.shipping_policy.body != blank -%}
+            {{ 'products.product.shipping_policy_html' | t: link: shop.shipping_policy.url }}
+          {%- endif -%}
+        </div>
+      {%- endif -%}
+
+    {%- when 'des' -%}
+      {%- if pr_tags contains 'hidet4_des' %}{% continue %}{% endif -%}
+      {%- if bk_stts.des == '1' and settings.des_pr_layout != '1' and call_cl != '_qv' %}{% continue %}{% endif -%}
+      <div class="pr_short_des">
+        {{- product.description -}}
+      </div>
+
+    {%- when 'frm' -%}
+      <div class="btn-atc atc-slide btn_full_{{bk_stts.btn_atc_full}} PR_no_pick_{{PR_no_pick}} btn_des_{{bk_stts.btn_des}} btn_txt_{{bk_stts.btn_txt}}">
+        {%- if nav_up_size == 0 -%}
+          <div
+            id="callBackVariant{{call_cl}}"
+            data-js-callback
+            class="nt_{{current_variant.option1 | handle}} nt1_{{current_variant.option2 | handle}} nt2_{{current_variant.option3 | handle}}"
+          >
+            {%- if nav_style_size > 0 -%}
+              {%- render 'choose_style',
+                call_cl: call_cl,
+                default: default,
+                style_tag_arr: style_tag_arr,
+                style_tag: style_tag,
+                nav_style: nav_style,
+                pid: pid
+              -%}
+            {%- endif -%}
+
+            {%- assign id_frm = 'cart-form' | append: call_cl -%}
+            {%- assign cl_frm = 'nt_cart_form variations_form variations_form' | append: call_cl -%}
+            {%- form 'product', product, id: id_frm, data-productid: pid, class: cl_frm -%}
+              {{ form | payment_terms }}
+              {%- if no_sold_out and settings.enable_sub_reCharge %}{% include 'subscription-product' %}{% endif -%}
+              {%- if settings.enable_infiniteoptions %}<div id="infiniteoptions-container"></div>{% endif -%}
+              {%- if default -%}
+                <input name="id" data-productid="{{pid}}" value="{{ pr_variants.first.id }}" type="hidden">
+                <div
+                  class="nt_pr_js lazypreload op__0"
+                  data-id="{{call_cl}}"
+                  data-include="{{locale_url}}/products/{{product.handle}}/?view=js{{call_cl}}"
+                ></div>
+                {%- if pr_incoming_mess
+                  and inventory_management
+                  and inventory_quantity <= 0
+                  and current_variant.incoming
+                -%}
+                  {%- assign idate = current_variant.next_incoming_date | date: format: settings.date_in -%}
+                  <div id="pr_incoming_mess{{call_cl}}" class="nt_varianqtyss mb__15 cb tu fwsb">
+                    {% if current_variant.available -%}
+                      {{- 'products.product.will_not_ship_until_html' | t: date: idate -}}
+                    {%- else -%}
+                      {{- 'products.product.will_be_in_stock_after_html' | t: date: idate -}}
+                    {%- endif %}
+                  </div>
+                {%- endif -%}
+                {{- product.metafields.meta.customProperty -}}
+              {%- else -%}
+                <select
+                  name="id"
+                  data-productid="{{pid}}"
+                  id="product-select{{call_cl}}"
+                  class="product-select_pr product-form__variants hide hidden"
+                >
+                  {%- for variant in pr_variants -%}
+                    {%- if variant.available -%}
+                      <option
+                        {% if variant.id == current_variant.id %}
+                          selected="selected"
+                        {% endif %}
+                        value="{{ variant.id }}"
+                      >
+                        {{ variant.title | escape }}
+                      </option>
+                    {%- else -%}
+                      <option
+                        value="{{ variant.id }}"
+                        {%- if remove_soldout %}
+                          disabled="disabled"
+                        {%- endif %}
+                        class="nt_sold_out"
+                      >
+                        {{ variant.title | escape }}
+                      </option>
+                    {%- endif -%}
+                  {%- endfor -%}
+                </select>
+
+                {%- case bk_stts.swatch_design -%}
+                  {%- when '1' -%}
+                    {%- render 'swatch',
+                      product: product,
+                      block: block,
+                      remove_soldout: remove_soldout,
+                      call_cl: call_cl,
+                      locale_url: locale_url
+                    -%}
+                  {%- when '2' -%}
+                    {%- render 'swatch_2',
+                      product: product,
+                      block: block,
+                      remove_soldout: remove_soldout,
+                      call_cl: call_cl,
+                      locale_url: locale_url
+                    -%}
+                  {%- when '3' -%}
+                    {%- render 'swatch_radio',
+                      product: product,
+                      block: block,
+                      remove_soldout: remove_soldout,
+                      call_cl: call_cl,
+                      locale_url: locale_url
+                    -%}
+                  {%- when '4' -%}
+                    {%- render 'swatch_radio_2',
+                      product: product,
+                      block: block,
+                      remove_soldout: remove_soldout,
+                      call_cl: call_cl,
+                      locale_url: locale_url
+                    -%}
+                  {%- when '5' -%}
+                    {%- render 'swatch_radio_3',
+                      product: product,
+                      block: block,
+                      remove_soldout: remove_soldout,
+                      call_cl: call_cl,
+                      locale_url: locale_url
+                    -%}
+                  {%- when '6' -%}
+                    {%- render 'swatch_radio_4',
+                      product: product,
+                      block: block,
+                      remove_soldout: remove_soldout,
+                      call_cl: call_cl,
+                      locale_url: locale_url
+                    -%}
+                  {%- when '7' -%}
+                    {%- render 'swatch_rectangle',
+                      product: product,
+                      block: block,
+                      remove_soldout: remove_soldout,
+                      call_cl: call_cl,
+                      locale_url: locale_url
+                    -%}
+                  {%- when '8' -%}
+                    {%- render 'swatch_rectangle_2',
+                      product: product,
+                      block: block,
+                      remove_soldout: remove_soldout,
+                      call_cl: call_cl,
+                      locale_url: locale_url
+                    -%}
+                  {%- when '9' -%}
+                    {%- render 'swatch_simple',
+                      product: product,
+                      block: block,
+                      remove_soldout: remove_soldout,
+                      call_cl: call_cl,
+                      locale_url: locale_url
+                    -%}
+                  {%- when '10' -%}
+                    {%- render 'swatch_simple_2',
+                      product: product,
+                      block: block,
+                      remove_soldout: remove_soldout,
+                      call_cl: call_cl,
+                      locale_url: locale_url
+                    -%}
+                {%- endcase -%}
+                {{- product.metafields.meta.customProperty -}}
+                <div
+                  class="nt_pr_js lazypreload op__0"
+                  data-id="{{call_cl}}"
+                  data-include="{{locale_url}}/products/{{product.handle}}/?view=js{{call_cl}}"
+                ></div>
+                {%- if pr_incoming_mess -%}
+                  {%- if inventory_quantity <= 0
+                    and current_variant.incoming
+                    and variants_size < 2
+                    and inventory_management
+                  -%}
+                    {%- assign idate = current_variant.next_incoming_date | date: format: settings.date_in -%}
+                    <div id="pr_incoming_mess{{call_cl}}" class="nt_varianqtyss mb__15 cb tu fwsb">
+                      {% if current_variant.available -%}
+                        {{- 'products.product.will_not_ship_until_html' | t: date: idate -}}
+                      {%- else -%}
+                        {{- 'products.product.will_be_in_stock_after_html' | t: date: idate -}}
+                      {%- endif %}
+                    </div>
+                  {%- else -%}
+                    <div id="pr_incoming_mess{{call_cl}}" class="nt_varianqty mb__15 cb tu fwsb dn">
+                      {{ 'products.product.will_not_ship_until_html' | t: date: '[19041994]' }}
+                    </div>
+                  {%- endif -%}
+                {%- endif -%}
+              {%- endif -%}
+
+              {%- if price_varies and current_variant.unit_price_measurement -%}
+                <span class="price">
+                  <span class="price_varies">
+                    {%- if on_sale -%}
+                      <del>{{ current_variant.compare_at_price | money }}</del
+                      ><ins>{{ current_variant.price | money }}</ins>
+                    {%- else -%}
+                      {{ current_variant.price | money }}
+                    {%- endif -%}
+                  </span>
+                  {%- capture unit_price_base_unit -%}
+                            <span class="unit_base">
+                              {%- if current_variant.unit_price_measurement -%}
+                                {%- if current_variant.unit_price_measurement.reference_value != 1 -%}
+                                  {{- current_variant.unit_price_measurement.reference_value -}}
+                                {%- endif -%}
+                                {{ current_variant.unit_price_measurement.reference_unit }}
+                              {%- endif -%}
+                            </span>
+                           {%- endcapture -%}
+                  <span class="price__unit db"
+                    ><span class="unit_price">{{ current_variant.unit_price | money }}</span><span>/</span>
+                    {{- unit_price_base_unit -}}
+                  </span>
+                </span>
+              {%- elsif price_varies and on_sale -%}
+                <span class="price price_varies"
+                  ><del>{{ current_variant.compare_at_price | money }}</del>
+                  <ins>{{ current_variant.price | money }}</ins></span
+                >
+              {%- elsif price_varies -%}
+                <span class="price price_varies">{{ current_variant.price | money }}</span>
+              {%- endif -%}
+
+              {%- assign PR_buy_pr = false -%}
+              {%- if bk_stts.enable_payment_btn and ck_external == false and no_sold_out -%}
+                {%- assign PR_buy_pr = true -%}
+              {%- endif -%}
+              <div class="variations_button in_flex column w__100 buy_qv_{{PR_buy_pr}}">
+                <div class="flex wrap">
+                  {%- if ck_external -%}
+                    <a href="{{link}}" rel="nofollow" target="_blank" class="truncate external_btn button">
+                      {{- title -}}
+                    </a>
+                    {%- render 'nt_add_w', class: 'order-3', tooltip: 'ttip_nt tooltip_top_left' -%}
+                  {%- elsif no_sold_out == false -%}
+                    <a
+                      rel="nofollow"
+                      data-no-instant
+                      href="#"
+                      class="truncate out_stock button pe_none"
+                      id="out_stock{{call_cl}}"
+                    >
+                      {{- 'products.product.outofstock' | t -}}
+                    </a>
+                    {%- render 'nt_add_w', tooltip: 'ttip_nt tooltip_top_left' -%}
+                  {%- else -%}
+                    <div class="quantity pr mr__10 order-1 qty__{{bk_stts.show_qty}}" id="sp_qty{{call_cl}}">
+                      <input
+                        type="number"
+                        class="input-text qty text tc qty_pr_js"
+                        step="1"
+                        min="1"
+                        max="{% if ck_preoder %}999{% elsif inventory_management != null %}{{inventory_quantity}}{% else %}9999{% endif %}"
+                        name="quantity"
+                        value="1"
+                        size="4"
+                        pattern="[0-9]*"
+                        inputmode="numeric"
+                      >
+                      <div class="qty tc fs__14">
+                        <button type="button" class="plus db cb pa pd__0 pr__15 tr r__0">
+                          <i class="facl facl-plus"></i></button
+                        ><button type="button" class="minus db cb pa pd__0 pl__15 tl l__0">
+                          <i class="facl facl-minus"></i>
+                        </button>
+                      </div>
+                    </div>
+                    <a
+                      rel="nofollow"
+                      data-no-instant
+                      href="#"
+                      class="single_stt out_stock button pe_none order-2"
+                      id="out_stock{{call_cl}}"
+                    >
+                      {{- 'products.product.outofstock' | t -}}
+                    </a>
+                    {%- render 'nt_add_w', class: 'order-3', tooltip: 'ttip_nt tooltip_top_left' -%}
+                    <button
+                      type="submit"
+                      data-time="{{bk_stts.time}}000"
+                      data-ani="{{bk_stts.ani}}"
+                      class="single_add_to_cart_button button truncate js_frm_cart w__100 mt__20 order-4{% if PR_no_pick %} disabled{% endif %}"
+                    >
+                      <span class="txt_add {{classdn1}}">{{ 'products.product.add_to_cart' | t }}</span
+                      ><span class="txt_pre {{classdn2}}">{{ 'products.product.add_to_cart' | t }}</span>
+                    </button>
+                  {%- endif -%}
+                </div>
+                {{- form | payment_button -}}
+              </div>
+            {%- endform -%}
+            <style>
+              @keyframes pulse {
+                0% {
+                  box-shadow: 0 0 0 0 rgba(0, 193, 0, 0.5);
+                }
+                70% {
+                  box-shadow: 0 0 0 6px rgba(0, 193, 0, 0);
+                }
+                100% {
+                  box-shadow: 0 0 0 0 rgba(0, 193, 0, 0);
+                }
+              }
+            </style>
+
+            <div
+              class="live__counter"
+              style="
+                display: inline-flex;
+                align-items: center;
+                padding: 6px 12px;
+                background-color: #eafff0;
+                border-radius: 999px;
+                font-size: 13px;
+                color: #009c10;
+                font-family: Arial, sans-serif;
+                margin-top: 10px;
+                box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+              "
+            >
+              <span
+                style="
+                  display: inline-block;
+                  width: 7px;
+                  height: 7px;
+                  background-color: #00c100;
+                  border-radius: 50%;
+                  margin-right: 8px;
+                  flex-shrink: 0;
+                  animation: pulse 1.8s infinite;
+                "
+              ></span>
+              <span><strong id="viewer-count">140</strong> people are currently watching this product</span>
+            </div>
+
+            <script>
+              function getRandomInt(min, max) {
+                return Math.floor(Math.random() * (max - min + 1)) + min;
+              }
+
+              setInterval(() => {
+                document.getElementById("viewer-count").textContent = getRandomInt(120, 160);
+              }, 4000);
+            </script>
+            {%- assign uavailable_v = pr_variants | where: 'available', false -%}
+            {%- if settings.use_notify_me and uavailable_v.size > 0 -%}
+              <div
+                class="form-notify single_variation_wrap w_100 frm_notify_pr mt__25 {%- if no_sold_out %} dn{%- endif -%}"
+                id="frm_notify{{call_cl}}"
+              >
+                {%- form 'contact', class: 'frm_notify w_100' -%}
+                  {%- assign formId = 'ContactForm' | append: call_cl | append: current_variant.id -%}
+                  {%- assign post_message = 'products.product.success_notify_me' -%}
+                  {%- render 'form-status', form: form, form_id: formId, success_message: post_message -%}
+                  <p class="cd fwsb mt__15 mb__10 fs__16">{{ 'products.product.title_notify_me' | t }}</p>
+                  <div class="row">
+                    {%- if customer and customer.name != blank -%}
+                      <div class="col-12 mb__20 hide hidden">
+                        <input type="text" id="{{ formId }}-name" name="contact[name]" value="{{ customer.name }}">
+                      </div>
+                    {%- endif -%}
+                    <div class="col-12 mb__20">
+                      <label for="{{ formId }}-email">
+                        {{- 'products.product.email_address' | t }}
+                        <span aria-hidden="true">*</span></label
+                      >
+                      <input
+                        required="required"
+                        type="email"
+                        id="{{ formId }}-email"
+                        name="contact[email]"
+                        autocorrect="off"
+                        autocapitalize="off"
+                        aria-required="true"
+                        {%- if form.errors contains 'email' %}
+                          class="input--error"
+                        {%- endif -%}
+                        value="{% if form.email %}{{ form.email }}{% elsif customer %}{{ customer.email }}{% endif %}"
+                      >
+                    </div>
+                    <div class="col-12 mb__20 hide hidden">
+                      <label for="{{ formId }}-message">{{ 'contact.form.message' | t }}</label>
+                      <textarea rows="10" id="{{ formId }}-message" name="contact[body]" data-wg-notranslate>
+                                {%- assign shop_url = shop.url | append:product.url -%}
+                                  {%- if variants_size < 2 -%}{{- 'products.product.please_notify_me' | t: title:product.title,variant:'',shop_url:shop_url,url:'' -}}
+                                  {%- else -%}{{- 'products.product.please_notify_me' | t: title:product.title,variant:' ( [variant] )',shop_url:shop_url,url:'[url]' -}}
+                                  {%- endif -%}
+                               </textarea>
+                    </div>
+                  </div>
+                  <input type="hidden" name="challenge" value="false">
+                  <input
+                    type="submit"
+                    class="add_to_cart_button button"
+                    value="{{ 'products.product.send_notify_me' | t }}"
+                  >
+                {%- endform -%}
+              </div>
+            {%- endif -%}
+          </div>
+        {%- else -%}
+          {%- comment %}product group{%- endcomment %}
+          {%- render 'grouped_product', block: block, nav_up: nav_up, call_cl: call_cl, pid: pid -%}
+        {%- endif -%}
+      </div>
+
+    {%- when 'store_avai' -%}
+      {%- if no_sold_out == false %}{% continue %}{% endif -%}
+      <div
+        id="store_availability{{call_cl}}"
+        class="product-single__store-availability-container dn"
+        data-store-availability-container
+        data-vid="{{current_variant.id}}"
+        data-product-title="{{ product.title | escape }}"
+        data-has-only-default-variant="{% if variants_size == 1 %}true{% else %}{{ default }}{% endif %}"
+        data-base-url="{{ shop.url }}{{ routes.root_url }}"
+      ></div>
+
+    {%- when 'size' -%}
+      <div class="extra-link mt__35 fwsb">
+        {%- if bk_stts.size_chart != '1' -%}
+          {%- assign ck_s = true -%}
+          {%- assign sc_type = bk_stts.sc_type -%}
+          {%- assign handle_size = pr_metafields_meta.page_size_chart
+            | default: collection.metafields.meta.page_size_chart
+          -%}
+          {%- assign page_size = pages[handle_size] -%}
+          {%- assign page_size_2 = pages[bk_stts.page] -%}
+          {%- assign img_meta = pr_metafields_meta.img_size_chart
+            | default: collection.metafields.meta.img_size_chart
+          -%}
+          {%- assign image = images[img_meta] -%}
+          {%- assign image_2 = bk_stts.image -%}
+
+          {%- if bk_stts.size_chart == '2' -%}
+            {%- assign ck_s = false -%}
+            {%- assign size_ck = bk_stts.size_ck | append: ',size,sizes,Größe' -%}
+            {%- assign get_size = size_ck | downcase | replace: ' ,', ',' | replace: ', ', ',' | split: ',' | uniq -%}
+            {%- for option in product.options_with_values -%}
+              {%- assign name = option.name | downcase -%}
+              {%- if get_size contains name -%}
+                {%- assign ck_s = true -%}
+                {%- break -%}
+              {%- endif -%}
+            {%- endfor -%}
+          {%- endif -%}
+
+          {%- if sc_type == '1' and ck_s and page_size != blank -%}
+            <a
+              class="cd chp ajax_pp_js mr__20"
+              href="#"
+              data-no-instant
+              rel="nofollow"
+              data-id="ps_ajax_pp_js"
+              data-url="{{page_size.url}}/?view=AjaxPopup"
+            >
+              {{- 'products.product.product_size_guide' | t -}}
+            </a>
+
+          {%- elsif sc_type == '2' and image != blank and ck_s -%}
+            <a
+              class="cd chp btn_size_guide mr__20"
+              href="#"
+              data-no-instant
+              rel="nofollow"
+              data-src="{{ image | img_url: 'master' }}"
+              data-width="{{ image.width }}"
+              data-height="{{ image.height }}"
+            >
+              {{- 'products.product.product_size_guide' | t -}}
+            </a>
+
+          {%- elsif sc_type == '1' and ck_s and page_size_2 != blank -%}
+            <a
+              class="cd chp ajax_pp_js mr__20"
+              href="#"
+              data-no-instant
+              rel="nofollow"
+              data-id="ps_ajax_pp_js"
+              data-url="{{page_size_2.url}}/?view=AjaxPopup"
+            >
+              {{- 'products.product.product_size_guide' | t -}}
+            </a>
+
+          {%- elsif sc_type == '2' and ck_s and image_2 != blank -%}
+            <a
+              class="cd chp btn_size_guide mr__20"
+              href="#"
+              data-no-instant
+              rel="nofollow"
+              data-src="{{ image_2 | img_url: 'master' }}"
+              data-width="{{ image_2.width }}"
+              data-height="{{ image_2.height }}"
+            >
+              {{- 'products.product.product_size_guide' | t -}}
+            </a>
+          {%- endif -%}
+        {%- endif -%}
+
+        {%- assign page_delivery = pages[bk_stts.page_dr] -%}
+        {%- if bk_stts.delivery and page_delivery != blank -%}
+          <a
+            class="ajax_pp_js cd chp mr__20"
+            href="#"
+            data-no-instant
+            rel="nofollow"
+            data-id="dl_ajax_pp_js"
+            data-url="{{page_delivery.url}}/?view=AjaxPopup"
+          >
+            {{- 'products.product.delivery_return' | t -}}
+          </a>
+        {%- endif -%}
+
+        {%- comment -%}
+          {%- assign page_ask = pages[bk_stts.page_ask] %}{% if bk_stts.ask and page_ask != blank -%}
+          <a class="ajax_pp_js cd chp" href="#" data-no-instant rel="nofollow" data-id='ask_ajax_pp_js' data-url="{{page_ask.url}}/?view=AjaxContact">{{ 'products.product.ask_question' | t }}</a>
+          {%- endif -%}
+        {%- endcomment -%}
+        {%- if bk_stts.ask -%}
+          <a
+            class="ajax_pp_js cd chp"
+            href="#"
+            data-no-instant
+            rel="nofollow"
+            data-id="ask_ajax_pp_js"
+            data-url="{{routes.search_url}}/?view=AjaxContact"
+            data-title="{{product.title | escape}}"
+            data-handle="{{ shop.url }}{{product.url}}"
+          >
+            {{- 'products.product.ask_question' | t -}}
+          </a>
+        {%- endif -%}
+      </div>
+
+    {%- when 'meta' -%}
+      {%- assign ck_meta = false -%}
+      {%- capture meta -%}
+          {%- if bk_stts.show_pr_vendor and product.vendor != blank -%} {%- assign ck_meta = true -%}
+          <span class="vendor_wrapper">{{ 'products.product.product_vendor' | t }} <span class="vendor value" id="product-vendor{{call_cl}}">{{ product.vendor | link_to_vendor }}</span></span>
+          {%- endif -%}
+          {%- if bk_stts.show_sku -%} {%- assign ck_meta = true -%}{%- if current_variant.sku != blank -%}{%-endif-%}
+          <span class="sku_wrapper">{{ 'products.product.product_sku' | t }} <span class="sku value cb{% if current_variant.sku == blank %} dn{% endif %}" id="pr_sku{{call_cl}}">{{current_variant.sku}}</span><span class="sku value{% if current_variant.sku != blank %} dn{% endif %}" id="pr_sku_na{{call_cl}}">{{ 'products.product.na' | t }}</span></span>
+          {%- endif -%}
+          {%- if bk_stts.show_available -%} {%- assign ck_meta = true -%}
+          <span class="available_wrapper">{{ 'products.product.available' | t }} <span class="available value"><span id="txt_vl_in{{call_cl}}" class="value_in cb{% if no_sold_out == false %} dn{% endif %}"><span class="js_in_stock {{classdn1}}">{{ 'products.product.in_stock' | t }}</span><span class="js_in_stock_pre_oder {{classdn2}}">{{ 'products.product.in_stock_pre_oder' | t }}</span></span><span id="txt_vl_out{{call_cl}}" class="value_out{% if no_sold_out %} dn{% endif %}">{{ 'products.product.outofstock' | t }}</span></span></span>
+          {%- endif -%}
+          {%- if product.collections.size > 0 and bk_stts.show_category_product -%} {%- assign ck_meta = true -%}
+          <span class="posted_in">{{ 'products.product.product_category' | t }}
+          {% for collection in product.collections -%}{{ collection.title | link_to: collection.url }}{%- if forloop.last == false -%}, {% endif -%}{%- endfor -%}
+          </span>
+          {%- endif -%}
+          {%- if pr_tags.size > 0 and bk_stts.show_tag_product and product.collections.size > 0 -%} {%- assign ck_meta = true -%}
+          <span class="tagged_as">{{ 'products.product.product_tag' | t }}
+           {% for tag in pr_tags -%}
+             {%- if tag contains 't4_' or tag contains 'badge_' %}{% continue %}{% endif -%}
+             <a href="{%- if collection != blank -%}{{ collection.url }}{%- else -%}{{ product.collections.first.url }}{%- endif -%}/{{ tag | handle }}">{{ tag | remove:'type ' | remove:'Type ' }}</a>{%- unless forloop.last -%}, {% endunless -%}
+           {%- endfor -%}
+          {%- endif -%}
+        {%- endcapture -%}
+      {%- if ck_meta -%}
+        <div class="product_meta">{{- meta -}}</div>
+      {%- endif -%}
+
+    {% when 'three_icons' %}
+      <div class="vtl-pl-main-widget__content">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="vtl-pl-main-widget__logo"
+          width="48"
+          height="30"
+          viewBox="0 0 240 150"
+          fill="none"
+        >
+          <g clip-path="url(#visa__a)"><path fill="#000" d="M221.053 0H18.947C8.211 0 0 8.125 0 18.75v112.5C0 141.875 8.842 150 18.947 150h202.106c10.736 0 18.947-8.125 18.947-18.75V18.75C240 8.125 231.158 0 221.053 0Z" opacity=".07"></path><path fill="#fff" d="M221.333 6C228.3 6 234 11.646 234 18.546v112.909c0 6.9-5.7 12.545-12.667 12.545H18.667C11.7 144 6 138.355 6 131.455V18.545C6 11.646 11.7 6 18.667 6h202.666Z"></path><path fill="#142688" d="M178.737 63.789h-1.895c-2.526 6.315-4.421 9.473-6.316 18.947h12c-1.895-9.474-1.895-13.895-3.789-18.947Zm18.316 37.263h-10.737c-.632 0-.632 0-1.263-.632l-1.264-5.684-.631-1.263H168c-.632 0-1.263 0-1.263 1.263l-1.895 5.684c0 .632-.632.632-.632.632h-13.263l1.263-3.158 18.316-42.948c0-3.157 1.895-4.42 5.053-4.42h9.474c.631 0 1.263 0 1.263 1.262l8.842 41.053c.631 2.527 1.263 4.421 1.263 6.948.632.631.632.631.632 1.263Zm-84.632-1.895 2.526-11.368c.632 0 1.263.631 1.263.631 4.421 1.895 8.843 3.158 13.264 2.526 1.263 0 3.158-.631 4.421-1.263 3.158-1.263 3.158-4.42.631-6.947-1.263-1.263-3.158-1.895-5.052-3.158-2.527-1.263-5.053-2.526-6.948-4.421-7.579-6.316-5.052-15.158-.631-19.579 3.789-2.526 5.684-5.053 10.736-5.053 7.579 0 15.79 0 19.579 1.264h.632c-.632 3.789-1.263 6.947-2.526 10.736C147.158 61.262 144 60 140.842 60c-1.895 0-3.789 0-5.684.632-1.263 0-1.895.631-2.527 1.263-1.263 1.263-1.263 3.158 0 4.42l3.158 2.527c2.527 1.263 5.053 2.527 6.948 3.79 3.158 1.894 6.316 5.052 6.947 8.842 1.263 5.684-.631 10.737-5.684 14.526-3.158 2.526-4.421 3.79-8.842 3.79-8.842 0-15.79.631-21.474-1.264-.631 1.264-.631 1.263-1.263.632Zm-22.105 1.895c.631-4.421.631-4.421 1.263-6.316 3.158-13.895 6.316-28.421 8.842-42.316.632-1.263.632-1.895 1.895-1.895h11.368c-1.263 7.58-2.526 13.264-4.421 20.21-1.895 9.475-3.789 18.948-6.316 28.422 0 1.263-.631 1.263-1.894 1.263M31.579 51.788c0-.631 1.263-1.263 1.895-1.263h21.473c3.158 0 5.684 1.895 6.316 5.053l5.684 27.79c0 .631 0 .631.632 1.263 0-.632.631-.632.631-.632l13.264-32.21c-.632-.632 0-1.264.631-1.264h13.263c0 .632 0 .632-.631 1.264l-19.58 46.105c-.63 1.263-.63 1.894-1.262 2.526-.632.632-1.895 0-3.158 0h-9.474c-.631 0-1.263 0-1.263-1.263L49.895 59.999c-1.264-1.263-3.158-3.158-5.685-3.79-3.789-1.894-10.736-3.157-12-3.157l-.631-1.264Z"></path></g><defs><clipPath id="visa__a"><path fill="#fff" d="M0 0h240v150H0z"></path></clipPath></defs>
+        </svg>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="vtl-pl-main-widget__logo"
+          width="48"
+          height="30"
+          viewBox="0 0 240 150"
+          fill="none"
+        >
+          <path fill="#000" d="M216.865 0H23.135c-.807 0-1.616 0-2.421.004-.68.006-1.36.013-2.04.031-1.48.04-2.975.128-4.438.388a15.06 15.06 0 0 0-4.217 1.38 14.11 14.11 0 0 0-6.203 6.158 14.737 14.737 0 0 0-1.39 4.19c-.265 1.454-.352 2.936-.392 4.406a98.7 98.7 0 0 0-.031 2.024C2 19.379 2 20.18 2 20.983v108.034c0 .803 0 1.602.003 2.405a95.9 95.9 0 0 0 .031 2.024c.04 1.467.129 2.95.392 4.403a14.74 14.74 0 0 0 1.389 4.19 14.02 14.02 0 0 0 2.61 3.567 14.086 14.086 0 0 0 3.592 2.591c1.35.683 2.734 1.118 4.22 1.383 1.462.259 2.956.346 4.438.386.68.016 1.358.024 2.039.028.805.006 1.614.006 2.42.006h193.731c.806 0 1.614 0 2.42-.006a99.506 99.506 0 0 0 2.04-.028c1.479-.04 2.973-.127 4.439-.386a15.019 15.019 0 0 0 4.217-1.383 14.145 14.145 0 0 0 6.203-6.158c.688-1.341 1.124-2.714 1.388-4.19.265-1.453.351-2.936.391-4.403.018-.675.028-1.35.031-2.024.006-.803.006-1.602.006-2.405V20.985c0-.803 0-1.604-.006-2.406a85.253 85.253 0 0 0-.031-2.022c-.04-1.47-.126-2.952-.391-4.406a14.644 14.644 0 0 0-1.388-4.19 14.122 14.122 0 0 0-6.203-6.158 15.07 15.07 0 0 0-4.217-1.378c-1.466-.262-2.96-.349-4.439-.388-.68-.017-1.36-.028-2.04-.031C218.479 0 217.671 0 216.865 0Z"></path><path fill="#fff" d="m216.896 5 2.385.004c.645.004 1.291.012 1.94.029 1.131.03 2.451.092 3.684.311 1.069.191 1.968.481 2.829.917a9.079 9.079 0 0 1 3.999 3.974c.437.85.728 1.735.92 2.807.22 1.209.281 2.524.311 3.652.019.637.027 1.274.029 1.925.007.788.007 1.576.007 2.366v108.032c0 .79 0 1.577-.006 2.381a86.981 86.981 0 0 1-.028 1.911c-.032 1.127-.093 2.442-.315 3.665a9.67 9.67 0 0 1-.92 2.796 9.091 9.091 0 0 1-4.005 3.973c-.856.433-1.752.723-2.811.913-1.257.222-2.635.283-3.672.311-.651.015-1.3.025-1.966.027-.792.006-1.588.006-2.381.006H23.073c-.785 0-1.57 0-2.368-.006a103.07 103.07 0 0 1-1.926-.025c-1.06-.028-2.439-.091-3.685-.312a9.942 9.942 0 0 1-2.832-.92 9.03 9.03 0 0 1-2.314-1.67 9.005 9.005 0 0 1-1.68-2.297 9.779 9.779 0 0 1-.921-2.81c-.223-1.222-.286-2.531-.314-3.65a92.756 92.756 0 0 1-.029-1.918L7 129.514V20.489l.003-1.876c.003-.64.012-1.28.028-1.92.032-1.122.093-2.431.317-3.663a9.75 9.75 0 0 1 .921-2.804A9.007 9.007 0 0 1 9.952 7.93a9.106 9.106 0 0 1 2.317-1.67 9.98 9.98 0 0 1 2.824-.915c1.233-.22 2.555-.28 3.688-.311a98 98 0 0 1 1.931-.029L23.104 5h193.792Z"></path><path fill="#000" d="M63.85 51.168c2.01-2.51 3.37-5.882 3.012-9.326-2.938.146-6.523 1.938-8.6 4.451-1.864 2.152-3.513 5.664-3.084 8.964 3.298.286 6.594-1.648 8.673-4.089Zm2.975 4.734c-4.792-.286-8.864 2.718-11.15 2.718-2.29 0-5.793-2.575-9.582-2.505-4.93.072-9.505 2.861-12.009 7.295-5.147 8.87-1.359 22.03 3.648 29.254 2.43 3.576 5.36 7.509 9.22 7.368 3.647-.143 5.076-2.36 9.508-2.36 4.43 0 5.717 2.36 9.578 2.288 4.002-.071 6.506-3.576 8.936-7.152 2.79-4.077 3.93-8.01 4.001-8.225-.072-.072-7.719-3.006-7.79-11.803-.072-7.367 6.005-10.872 6.29-11.087-3.43-5.076-8.792-5.648-10.652-5.791m47.759-9.968c10.411 0 17.662 7.176 17.662 17.624 0 10.486-7.4 17.7-17.922 17.7h-11.527V99.59h-8.328V45.934h20.115Zm-11.787 28.333h9.556c7.252 0 11.378-3.904 11.378-10.671 0-6.767-4.127-10.634-11.341-10.634h-9.593v21.305Zm31.515 14.205c0-6.88 5.242-10.82 14.909-11.415l10.374-.633V73.45c0-4.349-2.862-6.729-7.956-6.729-4.203 0-7.253 2.156-7.882 5.465h-7.513c.225-6.953 6.768-12.01 15.618-12.01 9.518 0 15.728 4.983 15.728 12.718V99.59h-7.696v-6.433h-.186c-2.194 4.202-7.029 6.841-12.272 6.841-7.733 0-13.124-4.609-13.124-11.525Zm25.283-3.458v-3.012l-9.258.595c-5.207.335-7.919 2.267-7.919 5.65 0 3.273 2.825 5.393 7.25 5.393 5.65 0 9.927-3.608 9.927-8.626Zm15.071 28.926v-6.431c.521.073 1.784.147 2.454.147 3.68 0 5.763-1.559 7.028-5.577l.743-2.38-14.092-39.04h8.7l9.817 31.678h.186l9.816-31.679h8.478L193.18 101.67c-3.347 9.408-7.176 12.495-15.281 12.495-.633 0-2.678-.075-3.235-.225Z"></path>
+        </svg>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="vtl-pl-main-widget__logo"
+          width="48"
+          height="30"
+          viewBox="0 0 240 150"
+          fill="none"
+        >
+          <g clip-path="url(#paypal__a)"><path fill="#000" d="M221.053 0H18.947C8.211 0 0 8.125 0 18.75v112.5C0 141.875 8.842 150 18.947 150h202.106c10.736 0 18.947-8.125 18.947-18.75V18.75C240 8.125 231.158 0 221.053 0Z" opacity=".07"></path><path fill="#fff" d="M221.333 6C228.3 6 234 11.646 234 18.546v112.909c0 6.9-5.7 12.545-12.667 12.545H18.667C11.7 144 6 138.355 6 131.455V18.545C6 11.646 11.7 6 18.667 6h202.666Z"></path><g clip-path="url(#paypal__b)"><path fill="#003087" d="M81.554 60.799a.812.812 0 0 0-.808.674l-4.664 28.873a.721.721 0 0 0 .172.595.756.756 0 0 0 .576.259h5.531a.813.813 0 0 0 .808-.674l1.37-8.48a.812.812 0 0 1 .809-.674h5.029c5.876 0 10.864-4.184 11.775-9.855.919-5.719-3.658-10.706-10.145-10.718H81.553Zm5.377 6.445h4.024c3.313 0 4.391 1.908 4.05 4.018-.34 2.115-2.016 3.672-5.22 3.672h-4.096l1.242-7.69Zm26.471 1.963c-1.397.005-3.004.285-4.808 1.018-4.139 1.684-6.126 5.164-6.97 7.701 0 0-2.687 7.74 3.383 11.993 0 0 5.629 4.095 11.966-.252l-.11.68a.717.717 0 0 0 .173.594.77.77 0 0 0 .574.26h5.251a.812.812 0 0 0 .808-.675l3.195-19.773a.734.734 0 0 0-.431-.786.77.77 0 0 0-.316-.069h-5.251a.813.813 0 0 0-.809.675l-.171 1.064s-2.293-2.445-6.484-2.43Zm.172 6.245c.603 0 1.154.082 1.649.237 2.266.71 3.55 2.834 3.179 5.137-.459 2.836-2.841 4.924-5.897 4.924-.602 0-1.154-.08-1.649-.236-2.265-.71-3.558-2.835-3.186-5.138.458-2.835 2.848-4.924 5.904-4.924Z"></path><path fill="#0070E0" d="M157.172 60.799a.812.812 0 0 0-.808.674l-4.665 28.873a.734.734 0 0 0 .432.786.77.77 0 0 0 .317.068h5.531a.813.813 0 0 0 .808-.674l1.37-8.48a.813.813 0 0 1 .809-.674h5.029c5.876 0 10.863-4.184 11.774-9.855.919-5.719-3.658-10.706-10.145-10.718h-10.452Zm5.377 6.445h4.024c3.312 0 4.391 1.908 4.05 4.018-.341 2.115-2.016 3.672-5.221 3.672h-4.095l1.242-7.69Zm26.47 1.963c-1.396.005-3.004.285-4.808 1.018-4.139 1.684-6.126 5.164-6.97 7.701 0 0-2.686 7.74 3.384 11.993 0 0 5.628 4.095 11.965-.252l-.109.68a.719.719 0 0 0 .173.594.756.756 0 0 0 .575.259h5.251a.812.812 0 0 0 .808-.674l3.195-19.773a.72.72 0 0 0-.172-.596.773.773 0 0 0-.576-.26h-5.251a.812.812 0 0 0-.808.676l-.172 1.064s-2.294-2.445-6.485-2.43Zm.172 6.245a5.5 5.5 0 0 1 1.649.237c2.266.71 3.551 2.834 3.179 5.137-.459 2.836-2.841 4.924-5.896 4.924a5.51 5.51 0 0 1-1.65-.236c-2.265-.71-3.557-2.835-3.186-5.138.459-2.835 2.849-4.924 5.904-4.924Z"></path><path fill="#003087" d="M129.355 69.899a.603.603 0 0 0-.585.783l5.757 17.438-5.205 8.218c-.253.399.041.914.521.914h6.152a1.041 1.041 0 0 0 .875-.482l16.078-25.962c.247-.4-.048-.91-.525-.91h-6.152c-.178 0-.352.046-.507.132a1.01 1.01 0 0 0-.373.359l-6.329 10.43-3.212-10.353a.818.818 0 0 0-.784-.568l-5.711.001Z"></path><path fill="#0070E0" d="M208.449 60.799a.813.813 0 0 0-.808.674l-4.665 28.872a.726.726 0 0 0 .172.596.768.768 0 0 0 .576.26h5.531a.812.812 0 0 0 .808-.675l4.665-28.873a.717.717 0 0 0-.173-.595.757.757 0 0 0-.574-.26h-5.532Z"></path><path fill="#001C64" d="M35.44 60.799c-.357 0-.701.124-.972.35-.27.226-.45.54-.506.883l-2.455 15.2A1.485 1.485 0 0 1 32.984 76h7.195c7.241 0 13.385-5.156 14.508-12.143.084-.522.13-1.049.142-1.576-1.84-.942-4.002-1.481-6.37-1.481h-13.02Z"></path><path fill="#0070E0" d="M54.83 62.28a11.713 11.713 0 0 1-.142 1.575C53.565 70.843 47.42 76 40.18 76h-7.195c-.736 0-1.363.522-1.478 1.233L29.25 91.2l-1.414 8.762a1.159 1.159 0 0 0 .275.956 1.22 1.22 0 0 0 .924.416h7.81c.356-.001.7-.125.971-.351.271-.226.45-.539.506-.882l2.057-12.735a1.45 1.45 0 0 1 .507-.883 1.52 1.52 0 0 1 .972-.35h4.598c7.24 0 13.385-5.156 14.508-12.144.797-4.959-1.762-9.472-6.135-11.71Z"></path><path fill="#003087" d="M26.567 50.668c-.736 0-1.364.523-1.478 1.232l-6.128 37.93c-.116.72.454 1.372 1.2 1.372h9.088l2.257-13.968 2.455-15.2a1.45 1.45 0 0 1 .506-.883c.27-.226.615-.35.971-.35h13.019c2.37 0 4.53.54 6.37 1.48.126-6.361-5.251-11.613-12.645-11.613H26.567Z"></path></g></g><defs><clipPath id="paypal__a"><path fill="#fff" d="M0 0h240v150H0z"></path></clipPath><clipPath id="paypal__b"><path fill="#fff" d="M18.947 50.666h195.789v50.667H18.947z"></path></clipPath></defs>
+        </svg>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="vtl-pl-main-widget__logo"
+          width="48"
+          height="30"
+          viewBox="0 0 240 150"
+          fill="none"
+        >
+          <g clip-path="url(#google_pay__a)"><path fill="#000" d="M221.053 0H18.947C8.211 0 0 8.125 0 18.75v112.5C0 141.875 8.842 150 18.947 150h202.106c10.736 0 18.947-8.125 18.947-18.75V18.75C240 8.125 231.158 0 221.053 0Z" opacity=".07"></path><path fill="#fff" d="M221.333 6C228.3 6 234 11.646 234 18.546v112.909c0 6.9-5.7 12.545-12.667 12.545H18.667C11.7 144 6 138.355 6 131.455V18.545C6 11.646 11.7 6 18.667 6h202.666Z"></path><path fill="#5F6368" d="M114.272 75.638v20.21h-6.43V45.953h16.996a15.458 15.458 0 0 1 11.034 4.37 14.41 14.41 0 0 1 4.567 10.038 14.4 14.4 0 0 1-3.873 10.325l-.694.733a15.46 15.46 0 0 1-11.034 4.257l-10.566-.038Zm0-23.57v17.608h10.724a8.512 8.512 0 0 0 6.347-2.552 8.78 8.78 0 0 0 1.74-9.532 8.78 8.78 0 0 0-8.087-5.335l-10.724-.19Zm40.951 8.513a16.033 16.033 0 0 1 11.23 3.871 13.5 13.5 0 0 1 4.105 10.415v21.057h-6.12v-4.838h-.31a12.184 12.184 0 0 1-10.566 5.88 13.703 13.703 0 0 1-9.448-3.366 10.52 10.52 0 0 1-3.872-8.362 10.147 10.147 0 0 1 3.872-8.438 17.342 17.342 0 0 1 10.724-3.253 18.873 18.873 0 0 1 9.41 2.09v-1.313a7.155 7.155 0 0 0-2.633-5.69 8.944 8.944 0 0 0-6.19-2.325 9.758 9.758 0 0 0-8.33 4.529l-5.653-3.563a15.714 15.714 0 0 1 13.781-6.694Zm-8.128 24.808a4.994 4.994 0 0 0 2.128 4.181 7.734 7.734 0 0 0 4.958 1.661 10.33 10.33 0 0 0 7.238-2.98 9.549 9.549 0 0 0 3.019-6.967 12.928 12.928 0 0 0-8.362-2.362 10.836 10.836 0 0 0-6.505 1.857 5.576 5.576 0 0 0-2.476 4.61Zm58.648-23.684-21.41 49.2h-6.619l8.09-17.23-14.046-31.97h6.966l10.181 24.537 9.91-24.537h6.928Z"></path><path fill="#4285F4" d="M88.333 71.268c0-1.946-.152-3.891-.461-5.811H60.777v11.034h15.48a13.239 13.239 0 0 1-5.684 8.671v7.162h9.246a27.997 27.997 0 0 0 8.514-21.056Z"></path><path fill="#34A853" d="M60.815 99.29a27.487 27.487 0 0 0 19.01-6.929l-9.259-7.2a17.379 17.379 0 0 1-25.857-9.095h-9.486v7.39A28.61 28.61 0 0 0 60.815 99.29Z"></path><path fill="#FBBC04" d="M44.71 76.105a17.11 17.11 0 0 1 0-10.958v-7.39h-9.487a28.453 28.453 0 0 0 0 25.738l9.486-7.39Z"></path><path fill="#EA4335" d="M60.815 53.306a15.487 15.487 0 0 1 10.99 4.295l8.21-8.166a27.6 27.6 0 0 0-19.358-7.472 28.61 28.61 0 0 0-25.434 15.79l9.486 7.395a17.148 17.148 0 0 1 16.106-11.842Z"></path></g><defs><clipPath id="google_pay__a"><path fill="#fff" d="M0 0h240v150H0z"></path></clipPath></defs>
+        </svg>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="vtl-pl-main-widget__logo"
+          width="48"
+          height="30"
+          viewBox="0 0 240 150"
+          fill="none"
+        >
+          <g clip-path="url(#mastercard__a)"><path fill="#000" d="M221.053 0H18.947C8.211 0 0 8.125 0 18.75v112.5C0 141.875 8.842 150 18.947 150h202.106c10.736 0 18.947-8.125 18.947-18.75V18.75C240 8.125 231.158 0 221.053 0Z" opacity=".07"></path><path fill="#fff" d="M221.333 6C228.3 6 234 11.646 234 18.546v112.909c0 6.9-5.7 12.545-12.667 12.545H18.667C11.7 144 6 138.355 6 131.455V18.545C6 11.646 11.7 6 18.667 6h202.666Z"></path><path fill="#EB001B" d="M94.737 119.999c24.417 0 44.21-19.794 44.21-44.21 0-24.417-19.793-44.21-44.21-44.21s-44.21 19.793-44.21 44.21c0 24.416 19.793 44.21 44.21 44.21Z"></path><path fill="#F79E1B" d="M145.263 119.999c24.417 0 44.211-19.794 44.211-44.21 0-24.417-19.794-44.21-44.211-44.21-24.417 0-44.21 19.793-44.21 44.21 0 24.416 19.793 44.21 44.21 44.21Z"></path><path fill="#FF5F00" d="M138.947 75.79c0-15.159-7.578-28.422-18.947-36-11.368 8.21-18.947 21.473-18.947 36 0 14.525 7.579 28.42 18.947 35.999 11.369-7.579 18.947-20.842 18.947-36Z"></path></g><defs><clipPath id="mastercard__a"><path fill="#fff" d="M0 0h240v150H0z"></path></clipPath></defs>
+        </svg>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="vtl-pl-main-widget__logo"
+          width="48"
+          height="30"
+          viewBox="0 0 240 150"
+          fill="none"
+        >
+          <g clip-path="url(#america_express__a)"><path fill="#000" d="M221.053 0H18.947C8.211 0 0 8.125 0 18.75v112.5C0 141.875 8.842 150 18.947 150h202.106c10.736 0 18.947-8.125 18.947-18.75V18.75C240 8.125 231.158 0 221.053 0Z" opacity=".07"></path><path fill="#006FCF" d="M221.333 6C228.3 6 234 11.646 234 18.546v112.909c0 6.9-5.7 12.545-12.667 12.545H18.667C11.7 144 6 138.355 6 131.455V18.545C6 11.646 11.7 6 18.667 6h202.666Z"></path><path fill="#fff" fill-rule="evenodd" d="M50.179 114.631V80.559h37.918l4.068 5.046 4.203-5.046H234v31.722s-3.599 2.316-7.762 2.35h-76.21l-4.587-5.371v5.371h-15.03v-9.168s-2.053 1.279-6.492 1.279h-5.116v7.889H96.046l-4.062-5.154-4.125 5.154h-37.68ZM6 54.879l8.531-18.967h14.754l4.842 10.624V35.912h18.34l2.882 7.679 2.795-7.679h82.329v3.86s4.328-3.86 11.441-3.86l26.713.09 4.758 10.484V35.912h15.348l4.224 6.023v-6.023h15.489v34.072h-15.489l-4.048-6.042v6.042h-22.55l-2.268-5.37h-6.062l-2.231 5.37h-15.292c-6.121 0-10.033-3.781-10.033-3.781v3.781h-23.058l-4.576-5.37v5.37h-85.74l-2.266-5.37H18.79l-2.25 5.37H6V54.88Zm.044 10.746 11.507-25.513h8.723L37.77 65.626h-7.656L28 60.516H15.66l-2.123 5.109H6.044ZM25.57 54.977l-3.762-8.927-3.773 8.927h7.535Zm12.992 10.644V40.108l10.646.038L55.4 56.595l6.044-16.487h10.56v25.513h-6.688V46.822l-7.09 18.799H52.36l-7.11-18.799v18.799h-6.688Zm38.019 0V40.108h21.825v5.707H83.34v4.364h14.714v5.37H83.34v4.533h15.066v5.539H76.581Zm25.697.004V40.112h14.884c4.932 0 9.351 2.909 9.351 8.277 0 4.59-3.726 7.546-7.338 7.837l8.801 9.399h-8.173l-8.02-9.064h-2.816v9.064h-6.689Zm14.334-19.806h-7.645v5.371h7.744c1.341 0 3.069-.99 3.069-2.685 0-1.318-1.334-2.686-3.168-2.686Zm19.461 19.802h-6.83V40.108h6.83v25.513Zm16.193 0h-1.474c-7.133 0-11.463-5.359-11.463-12.652 0-7.473 4.282-12.86 13.289-12.86h7.392v6.042h-7.663c-3.656 0-6.242 2.72-6.242 6.881 0 4.941 2.957 7.016 7.217 7.016h1.76l-2.816 5.573Zm3.047.004 11.507-25.513h8.723l11.496 25.513h-7.657l-2.112-5.109h-12.343l-2.123 5.109h-7.491Zm19.526-10.648-3.762-8.927-3.773 8.927h7.535Zm12.981 10.644V40.108h8.504l10.857 16.03v-16.03h6.689v25.513h-8.229l-11.133-16.45v16.45h-6.688ZM54.755 110.267V84.755h21.826v5.707H61.514v4.364H76.23v5.371H61.514v4.531h15.067v5.539H54.755Zm106.945 0V84.755h21.825v5.707h-15.066v4.364h14.644v5.371h-14.644v4.531h15.066v5.539H161.7Zm-84.272 0 10.626-12.599-10.88-12.913h8.427l6.48 7.983 6.501-7.983h8.097L95.942 97.51l10.646 12.756h-8.425l-6.291-7.857-6.139 7.857h-8.305Zm29.955.004V84.759h14.774c6.062 0 9.603 3.726 9.603 8.581 0 5.861-4.515 8.875-10.472 8.875h-7.041v8.056h-6.864Zm14.279-19.742h-7.415v5.874h7.393c1.953 0 3.322-1.234 3.322-2.937 0-1.812-1.376-2.937-3.3-2.937Zm13.003 19.738V84.755h14.883c4.932 0 9.351 2.908 9.351 8.277 0 4.59-3.726 7.545-7.337 7.836l8.8 9.399h-8.173l-8.02-9.063h-2.816v9.063h-6.688Zm14.333-19.805h-7.645v5.37h7.744c1.341 0 3.07-.99 3.07-2.685 0-1.317-1.334-2.685-3.169-2.685Zm37.625 19.805v-5.539h13.386c1.98 0 2.838-1.02 2.838-2.14 0-1.072-.855-2.156-2.838-2.156h-6.049c-5.258 0-8.186-3.055-8.186-7.642 0-4.09 2.681-8.035 10.495-8.035h13.025l-2.817 5.74h-11.264c-2.154 0-2.817 1.078-2.817 2.107 0 1.057.82 2.224 2.465 2.224h6.336c5.861 0 8.405 3.17 8.405 7.322 0 4.463-2.835 8.119-8.724 8.119h-14.255Zm23.568 0v-5.539h13.386c1.98 0 2.838-1.02 2.838-2.14 0-1.072-.855-2.156-2.838-2.156h-6.049c-5.258 0-8.186-3.055-8.186-7.642 0-4.09 2.681-8.035 10.495-8.035h13.024l-2.816 5.74h-11.264c-2.154 0-2.817 1.078-2.817 2.107 0 1.057.819 2.224 2.465 2.224h6.336c5.861 0 8.404 3.17 8.404 7.322 0 4.463-2.834 8.119-8.723 8.119h-14.255Z" clip-rule="evenodd"></path></g><defs><clipPath id="america_express__a"><path fill="#fff" d="M0 0h240v150H0z"></path></clipPath></defs>
+        </svg>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="vtl-pl-main-widget__logo"
+          width="48"
+          height="30"
+          viewBox="0 0 240 150"
+          fill="none"
+        >
+          <g clip-path="url(#klarna__a)"><path fill="#FFB3C7" fill-rule="evenodd" d="M221.053 0H18.947C8.211 0 0 8.125 0 18.75v112.5C0 141.875 8.842 150 18.947 150h202.106c10.736 0 18.947-8.125 18.947-18.75V18.75C240 8.125 231.158 0 221.053 0Z" clip-rule="evenodd"></path><path fill="#FFB3C7" fill-rule="evenodd" d="M221.333 6C228.3 6 234 11.646 234 18.546v112.909c0 6.9-5.7 12.545-12.667 12.545H18.667C11.7 144 6 138.355 6 131.455V18.545C6 11.646 11.7 6 18.667 6h202.666Z" clip-rule="evenodd"></path><path fill="#0A0B09" d="M215.476 83.266c-3.076 0-5.571 2.527-5.571 5.634 0 3.114 2.495 5.64 5.571 5.64 3.082 0 5.577-2.526 5.577-5.64a5.61 5.61 0 0 0-5.577-5.634Zm-18.335-4.357c0-4.27-3.6-7.725-8.046-7.725-4.447 0-8.047 3.455-8.047 7.718s3.6 7.724 8.047 7.724c4.446 0 8.046-3.46 8.046-7.724v.007Zm.032-15.007h8.88v30h-8.88V91.99a15.452 15.452 0 0 1-8.805 2.747c-8.646 0-15.65-7.086-15.65-15.834 0-8.74 7.01-15.827 15.65-15.827 3.266 0 6.291 1.01 8.805 2.747v-1.92Zm-71.072 3.91v-3.91h-9.095v30h9.114V79.9c0-4.73 5.065-7.263 8.583-7.263h.101v-8.728c-3.6 0-6.922 1.56-8.703 3.903Zm-22.648 11.09c0-4.263-3.6-7.718-8.047-7.718-4.44 0-8.046 3.455-8.046 7.718s3.6 7.724 8.046 7.724c4.447 0 8.047-3.46 8.047-7.724Zm.031-15h8.88v30h-8.88V91.99a15.446 15.446 0 0 1-8.81 2.747c-8.64 0-15.65-7.086-15.65-15.834 0-8.74 7.01-15.827 15.65-15.827a15.4 15.4 0 0 1 8.804 2.747l.006-1.92Zm53.451-.808c-3.543 0-6.903 1.118-9.145 4.187v-3.379h-8.843v30h8.95V78.138c0-4.56 3.025-6.796 6.663-6.796 3.903 0 6.145 2.362 6.145 6.733v15.834h8.874v-19.08c0-6.986-5.495-11.735-12.644-11.735Zm-90.84 30.82h9.297V50.526h-9.297v43.39Zm-40.832 0h9.84V50.526h-9.84v43.39Zm34.421-43.389a34.717 34.717 0 0 1-10.06 24.632l13.603 18.758H51.07L36.283 73.527l3.815-2.892a25.012 25.012 0 0 0 9.96-20.11h9.625Z"></path></g><defs><clipPath id="klarna__a"><path fill="#fff" d="M0 0h240v150H0z"></path></clipPath></defs>
+        </svg>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="vtl-pl-main-widget__logo"
+          width="48"
+          height="30"
+          viewBox="0 0 240 150"
+          fill="none"
+        >
+          <g clip-path="url(#discover__a)"><path fill="#000" d="M221.053 0H18.947C8.211 0 0 8.125 0 18.75v112.5C0 141.875 8.842 150 18.947 150h202.106c10.736 0 18.947-8.125 18.947-18.75V18.75C240 8.125 231.158 0 221.053 0Z" opacity=".07"></path><path fill="#fff" d="M221.333 6C228.3 6 234 11.646 234 18.546v112.909c0 6.9-5.7 12.545-12.667 12.545H18.667C11.7 144 6 138.355 6 131.455V18.545C6 11.646 11.7 6 18.667 6h202.666Z"></path><path fill="#231F20" d="M22.547 44.22h-9.915v34.738h9.915c5.242 0 9.032-1.263 12.38-3.98 3.978-3.283 6.315-8.21 6.315-13.326-.063-10.294-7.705-17.431-18.695-17.431Zm7.958 26.148c-2.147 1.895-4.863 2.78-9.284 2.78H19.39v-22.99h1.831c4.358 0 7.01.758 9.284 2.779 2.337 2.084 3.727 5.305 3.727 8.652 0 3.348-1.39 6.695-3.727 8.78Zm13.832-26.147h6.758v34.737h-6.758V44.22Zm23.305 13.326C63.6 56.031 62.4 55.021 62.4 53.19c0-2.21 2.147-3.852 5.053-3.852 2.02 0 3.726.82 5.431 2.842l3.537-4.61c-2.905-2.527-6.379-3.854-10.232-3.854-6.126 0-10.863 4.295-10.863 9.98 0 4.8 2.21 7.263 8.527 9.536 2.652.948 3.979 1.58 4.673 1.958 1.327.884 2.021 2.148 2.021 3.6 0 2.842-2.21 4.927-5.242 4.927-3.22 0-5.81-1.643-7.39-4.611l-4.357 4.232c3.095 4.61 6.884 6.631 12 6.631 7.01 0 12-4.674 12-11.431.126-5.622-2.21-8.148-9.916-10.99Zm12.126 4.105c0 10.232 8.022 18.127 18.316 18.127 2.905 0 5.432-.569 8.463-2.021V69.8c-2.715 2.716-5.115 3.79-8.147 3.79-6.821 0-11.684-4.927-11.684-12 0-6.696 4.99-11.938 11.368-11.938 3.221 0 5.684 1.137 8.463 3.916V45.61c-2.968-1.516-5.431-2.147-8.337-2.147-10.168 0-18.442 8.084-18.442 18.19Zm80.59 5.937-9.284-23.368h-7.39L158.4 79.84h3.663l14.969-35.62h-7.327l-9.347 23.368Zm19.768 11.369h19.2v-5.874h-12.442v-9.347h12v-5.874h-12v-7.705h12.442V44.22h-19.2v34.737Zm46.042-24.442c0-6.506-4.484-10.232-12.315-10.232h-10.042V79.02h6.757V65.063h.885L220.8 79.02h8.337l-10.926-14.653c5.115-1.073 7.957-4.547 7.957-9.852Zm-13.642 5.747h-1.958V49.716h2.085c4.231 0 6.505 1.768 6.505 5.178 0 3.474-2.274 5.369-6.632 5.369Z"></path><path fill="url(#discover__b)" d="M127.326 81.22a18.512 18.512 0 1 0 0-37.024 18.512 18.512 0 0 0 0 37.024Z"></path><path fill="url(#discover__c)" d="M127.326 81.22a18.512 18.512 0 1 0 0-37.024 18.512 18.512 0 0 0 0 37.024Z" opacity=".65"></path><path fill="#231F20" d="M230.968 47.406c0-.631-.442-.947-1.136-.947h-1.011v3.032h.758v-1.2l.884 1.2h.884l-1.01-1.264c.379-.063.631-.378.631-.82Zm-1.263.443h-.126v-.822h.126c.379 0 .569.127.569.38 0 .315-.19.442-.569.442Z"></path><path fill="#231F20" d="M229.958 45.322a2.669 2.669 0 0 0-2.653 2.653c0 1.453 1.2 2.652 2.653 2.652s2.653-1.2 2.653-2.652c0-1.453-1.2-2.653-2.653-2.653Zm0 4.863c-1.137 0-2.147-.947-2.147-2.21 0-1.2.947-2.21 2.147-2.21 1.137 0 2.084 1.01 2.084 2.21s-.947 2.21-2.084 2.21Z"></path><path fill="#F48120" d="M233.684 81.004s-62.589 43.509-176.994 63.259h164.356a12.633 12.633 0 0 0 12.632-12.531l.151-19.073-.145-31.655Z"></path></g><defs><linearGradient id="discover__b" x1="136.781" x2="123.992" y1="77.526" y2="57.498" gradientUnits="userSpaceOnUse"><stop stop-color="#F89F20"></stop><stop offset=".25" stop-color="#F79A20"></stop><stop offset=".533" stop-color="#F68D20"></stop><stop offset=".62" stop-color="#F58720"></stop><stop offset=".723" stop-color="#F48120"></stop><stop offset="1" stop-color="#F37521"></stop></linearGradient><linearGradient id="discover__c" x1="134.766" x2="116.072" y1="77.254" y2="40.711" gradientUnits="userSpaceOnUse"><stop stop-color="#F58720"></stop><stop offset=".359" stop-color="#E16F27"></stop><stop offset=".703" stop-color="#D4602C"></stop><stop offset=".982" stop-color="#D05B2E"></stop></linearGradient><clipPath id="discover__a"><path fill="#fff" d="M0 0h240v150H0z"></path></clipPath></defs>
+        </svg>
+      </div>
+      <div class="three_icons_pro">
+        {% if block.settings.first__img or block.settings.first__icon %}
+          <div class="three_icons_one">
+            {% if block.settings.first__img %}
+              <img src="{{ block.settings.first__img | img_url: '' }}">
+            {% endif %}
+            {% if block.settings.first__icon %}
+              <span>{{ block.settings.first__icon }}</span>
+            {% endif %}
+          </div>
+        {% endif %}
+
+        {% if block.settings.sec__img or block.settings.sec__icon %}
+          <div class="three_icons_one">
+            {% if block.settings.sec__img %}
+              <img src="{{ block.settings.sec__img | img_url: '' }}">
+            {% endif %}
+            {% if block.settings.sec__icon %}
+              <span>{{ block.settings.sec__icon }}</span>
+            {% endif %}
+          </div>
+        {% endif %}
+
+        {% if block.settings.thrd__img or block.settings.thrd__icon %}
+          <div class="three_icons_one">
+            {% if block.settings.thrd__img %}
+              <img src="{{ block.settings.thrd__img | img_url: '' }}">
+            {% endif %}
+            {% if block.settings.thrd__icon %}
+              <span>{{ block.settings.thrd__icon }}</span>
+            {% endif %}
+          </div>
+        {% endif %}
+      </div>
+
+    {% when 'accordions' %}
+      <div class="product_accordion">
+        {% if product.description != blank %}
+          <div class="product_accordion-item">
+            <div class="product_accordion-header" onclick="toggleProductAccordion(this)">
+              {{ block.settings.first_acc_head }}
+              <span class="icon"
+                ><img src="https://cdn.shopify.com/s/files/1/0937/6366/6242/files/arrow_2.png?v=1747499733"
+              ></span>
+            </div>
+            <div class="product_accordion-content">
+              {{ product.description }}
+            </div>
+          </div>
+        {% endif %}
+
+        {% if product.metafields.custom.most_common_questions != blank %}
+          <div class="product_accordion-item">
+            <div class="product_accordion-header" onclick="toggleProductAccordion(this)">
+              {{ block.settings.second_acc_head }}
+              <span class="icon"
+                ><img src="https://cdn.shopify.com/s/files/1/0937/6366/6242/files/arrow_2.png?v=1747499733"
+              ></span>
+            </div>
+            <div class="product_accordion-content">
+              {{ product.metafields.custom.most_common_questions | metafield_tag }}
+            </div>
+          </div>
+        {% endif %}
+
+        {% if product.metafields.custom.processing_shipping != blank %}
+          <div class="product_accordion-item">
+            <div class="product_accordion-header" onclick="toggleProductAccordion(this)">
+              {{ block.settings.third_acc_head }}
+              <span class="icon"
+                ><img src="https://cdn.shopify.com/s/files/1/0937/6366/6242/files/arrow_2.png?v=1747499733"
+              ></span>
+            </div>
+            <div class="product_accordion-content">
+              {{ product.metafields.custom.processing_shipping | metafield_tag }}
+            </div>
+          </div>
+        {% endif %}
+      </div>
+
+      <script>
+        function toggleProductAccordion(header) {
+          const content = header.nextElementSibling;
+          const isOpen = content.classList.contains("open");
+
+          document.querySelectorAll(".product_accordion-content").forEach(el => {
+            el.classList.remove("open");
+            el.style.maxHeight = null;
+          });
+
+          if (!isOpen) {
+            content.classList.add("open");
+            content.style.maxHeight = content.scrollHeight + "px";
+          }
+        }
+      </script>
+
+    {%- when 'social' -%}
+      {%- if des_pr_layout == '2' and call_cl == '_ppr' or settings.social_pr == false %}{% continue %}{% endif -%}
+      <div class="social-share {{bk_stts.class}}">
+        {%- if settings.share_source == '1' %}
+          {%- render 'social-sharing' -%}
+        {%- elsif settings.share_source == '3' %}
+          {% capture the_snippet_share %}
+                {% render  'ssw-widget-share-links' with 1 %}
+              {% endcapture %}
+          {% unless the_snippet_share contains 'Liquid error' %}
+            {{ the_snippet_share }}
+          {% endunless %}
+        {%- else -%}
+          <div class="nt-social nt__addthis addthis_inline_share_toolbox_icxz"></div>
+        {% endif %}
+      </div>
+
+    {%- when 'img' -%}
+      <div id="trust_seal{{call_cl}}" class="pr_trust_seal {{bk_stts.al}}_md tc">
+        {%- if bk_stts.mess -%}
+          <p class="mess_cd cb mb__10 fwm tu" style="font-size: {{bk_stts.size}}px">{{ bk_stts.mess }}</p>
+        {%- endif -%}
+        {%- assign image = bk_stts.image -%}
+        {%- if bk_stts.source == '1' and image != blank -%}
+          {%- assign img_url = image | img_url: '1x1' | replace: '_1x1.', '_{width}x.' -%}
+          <img
+            style="--max-w-img:{{image.width}}px;width: {% if call_cl == '_ppr' %}{{bk_stts.wimg}}{% else %}100{% endif %}%"
+            class="lazyload lz_op_ef img_tr_s1"
+            src="data:image/svg+xml,%3Csvg%20viewBox%3D%220%200%20{{image.width}}%20{{image.height}}%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3C%2Fsvg%3E"
+            data-src="{{ img_url }}"
+            data-widths="[90, 120, 150, 180, 360, 480, 600, 750, 940, 1080, 1296]"
+            data-sizes="auto"
+            alt="{{image.alt}}"
+          >
+        {%- else -%}
+          {%- assign arr = bk_stts.svg | remove: ' ' | split: ',' -%}
+          <style>
+            .pr_trust_seal img {padding: 2.5px;height: {{bk_stts.height}}px;}
+          </style>
+          {%- for img in arr -%}
+            <img
+              class="lazyload img_tr_svg"
+              src="https://cdn.shopify.com/s/assets/payment_icons/generic-dfdcaf09b6731ca14dd7441354c0ad8bc934184eb15ae1fda6a6b9e307675485.svg"
+              data-src="{{ img | payment_type_img_url }}"
+              alt="{{img | replace:'_',' '}}"
+            >
+          {%- endfor -%}
+        {%- endif -%}
+      </div>
+
+    {%- when 'countdown' -%}
+      {%- assign meta = pr_metafields_meta.countdown -%}
+      {%- if meta != blank -%}
+        {%- assign _meta = meta | remove: '/' | remove: ':' | remove: ' ' -%}
+
+        <div id="nt_countdow{{call_cl}}_txt" class="{{bk_stts.al}} cd_style_{{bk_stts.cd_style}}">
+          {%- if bk_stts.mess != blank -%}
+            <p class="mess_cd cb mb__10 lh__1 dn fwm tu" style="font-size: {{bk_stts.size}}px">
+              {%- if bk_stts.icon != '1' -%}
+                {%- if bk_stts.icon == '3' and bk_stts.img != blank -%}
+                  <img
+                    class="lazyload img_w25 w__100 mr__5 fading_{{bk_stts.fade}}"
+                    src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=="
+                    data-src="{{ bk_stts.img | img_url: '50x' }}"
+                    alt="{{settings.img.alt | default:'stock kalles' }}"
+                  >
+                {%- else -%}
+                  <i class="cd mr__5 fading_{{bk_stts.fade}} fs__20 las la-{{bk_stts.icon_name}}"></i>
+                {%- endif -%}
+              {%- endif -%}
+              {{ bk_stts.mess }}
+            </p>
+          {%- endif -%}
+          <div
+            class="nt_countdow_page in_flex fl_between lh__1"
+            data-timezone="{{bk_stts.timezone}}"
+            data-loop="{{bk_stts.loop}}"
+            id="nt_countdow{{call_cl}}"
+            data-time="{{meta}}"
+            data-timej="{{_meta}}"
+          ></div>
+          <span class="day dn">{{ bk_stts.day }}</span><span class="hr dn">{{ bk_stts.hr }}</span
+          ><span class="min dn">{{ bk_stts.min }}</span><span class="sec dn">{{ bk_stts.sec }}</span>
+        </div>
+
+      {%- elsif bk_stts.stock_time != blank or pr_metafields_meta.countdown_day != blank -%}
+        {%- if bk_stts.source == '2' -%}
+          {%- unless pr_tags contains 'has_stock_countdown' -%}{%- continue -%}{%- endunless -%}
+        {%- endif -%}
+        <div id="nt_countdow{{call_cl}}_txt" class="{{bk_stts.al}} cd_style_{{bk_stts.cd_style}}">
+          {%- if bk_stts.mess != blank -%}
+            <p class="mess_cd cb mb__10 lh__1 dn fwm tu" style="font-size: {{bk_stts.size}}px">
+              {%- if bk_stts.icon != '1' -%}
+                {%- if bk_stts.icon == '3' and bk_stts.img != blank -%}
+                  <img
+                    class="lazyload img_w25 w__100 mr__5 fading_{{bk_stts.fade}}"
+                    src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=="
+                    data-src="{{ bk_stts.img | img_url: '50x' }}"
+                    alt="{{settings.img.alt | default:'stock kalles' }}"
+                  >
+                {%- else -%}
+                  <i class="cd mr__5 fading_{{bk_stts.fade}} fs__20 las la-{{bk_stts.icon_name}}"></i>
+                {%- endif -%}
+              {%- endif -%}
+              {{ bk_stts.mess }}
+            </p>
+          {%- endif -%}
+          <div
+            class="nt_countdow_page nt_loop in_flex fl_between lh__1"
+            data-timezone="{{bk_stts.timezone}}"
+            data-loop="{{bk_stts.loop}}"
+            id="nt_countdow{{call_cl}}"
+            data-time="{{ pr_metafields_meta.countdown_day | default:bk_stts.stock_time | json }}"
+          ></div>
+          <span class="day dn">{{ bk_stts.day }}</span><span class="hr dn">{{ bk_stts.hr }}</span
+          ><span class="min dn">{{ bk_stts.min }}</span><span class="sec dn">{{ bk_stts.sec }}</span>
+        </div>
+      {%- endif -%}
+
+    {%- when 'stock' -%}
+      {%- if bk_stts.mess == blank or no_sold_out == false -%}{%- continue -%}{%- endif -%}
+      {%- assign arr = bk_stts.mess | split: '[stock_number]' -%}
+      <div
+        id="nt_stock{{call_cl}}"
+        class="nt_stock_page {{bk_stts.al}}"
+        data-type="ATC{% if bk_stts.reduce %}_NONE{% endif %}"
+        data-cur="{{inventory_quantity |default:0}}"
+        data-prid="{{pid}}"
+        data-st="{{bk_stts.st}}"
+        data-qty="{{bk_stts.qty}}"
+        data-total="{{bk_stts.total_items}}"
+        data-min="{{bk_stts.stock_from}}"
+        data-max="{{bk_stts.stock_to}}"
+        data-bgprocess="{{bk_stts.stock_bg_process}}"
+        data-bgten="{{bk_stts.bgten}}"
+      >
+        <p class="message dn cb mb__10 lh__1 fwm" style="font-size:{{bk_stts.size}}px">
+          {%- if bk_stts.icon != '1' -%}
+            {%- if bk_stts.icon == '3' and bk_stts.img != blank -%}
+              <img
+                class="lazyload img_w25 w__100 mr__5 fading_{{bk_stts.fade}}"
+                src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=="
+                data-src="{{ bk_stts.img | img_url: '50x' }}"
+                alt="{{settings.img.alt | default:'stock kalles' }}"
+              >
+            {%- else -%}
+              <i class="cd mr__5 fading_{{bk_stts.fade}} fs__20 las la-{{bk_stts.icon_name}}"></i>
+            {%- endif -%}
+          {%- endif -%}
+          {{ arr[0] }}
+          <span class="count"></span> {{ arr[1] }}
+        </p>
+        {%- if bk_stts.progress -%}
+          <div
+            class="progressbar progress_bar pr oh dn"
+            style="display:none;background-color:{{bk_stts.stock_bg}};width:{{bk_stts.wbar}}%"
+          >
+            <div style="background-color:{{bk_stts.stock_bg_process}};width: 100%;"></div>
+          </div>
+        {%- endif -%}
+      </div>
+
+    {%- when 'time' -%}
+      {%- if bk_stts.text == blank -%}{%- continue -%}{%- endif -%}
+      <div
+        id="counter{{call_cl}}"
+        class="pr_counter dn cd"
+        data-min="{{bk_stts.min}}"
+        data-max="{{bk_stts.max}}"
+        data-interval="{{bk_stts.time}}000"
+      >
+        {%- if bk_stts.icon != '1' -%}
+          {%- if bk_stts.icon == '3' and bk_stts.img != blank -%}
+            <img
+              class="lazyload img_w25 w__100 mr__5 fading_{{bk_stts.fade}}"
+              src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=="
+              data-src="{{ bk_stts.img | img_url: '50x' }}"
+              alt="{{settings.img.alt | default:'time kalles' }}"
+            >
+          {%- else -%}
+            <i class="cd mr__5 fading_{{bk_stts.fade}} fs__20 las la-{{bk_stts.icon_name}}"></i>
+          {%- endif -%}
+        {%- endif -%}
+        {{ bk_stts.text | replace: '[count]', '<span class="count clc fwm cd"></span>' }}
+      </div>
+
+    {%- when 'sold' -%}
+      {%- if bk_stts.text == blank or no_sold_out == false -%}{%- continue -%}{%- endif -%}
+      <div
+        id="sold{{call_cl}}"
+        data-time="120000"
+        data-id="{{product.id}}"
+        class="pr_flash_sold cb dn"
+        data-mins="{{bk_stts.mins}}"
+        data-maxs="{{bk_stts.maxs}}"
+        data-mint="{{bk_stts.mint}}"
+        data-maxt="{{bk_stts.maxt}}"
+      >
+        {%- if bk_stts.icon != '1' -%}
+          {%- if bk_stts.icon == '3' and bk_stts.img != blank -%}
+            <img
+              class="lazyload img_w25 w__100 mr__5 fading_{{bk_stts.fade}}"
+              src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=="
+              data-src="{{ bk_stts.img | img_url: '50x' }}"
+              alt="{{settings.img.alt | default:'sold kalles' }}"
+            >
+          {%- else -%}
+            <i class="cd mr__5 fading_{{bk_stts.fade}} fs__20 las la-{{bk_stts.icon_name}}"></i>
+          {%- endif -%}
+        {%- endif -%}
+        {{
+          bk_stts.text
+          | replace: '[sold]', '<span class="nt_pr_sold clc fwm"></span>'
+          | replace: '[hour]', '<span class="nt_pr_hrs clc fwm"></span>'
+        }}
+      </div>
+
+      {%- comment -%}
+        {%- when 'free' -%}
+          <div id="ship{{call_cl}}" class="pr_ship_text dn cb" data-ship="{{ country_option_tags  | strip_html | strip_newlines }}">
+            {%- if bk_stts.icon == '2' or bk_stts.icon == '3' -%}
+              <span class="fading_{{bk_stts.fade}} fs__25 mr__5">{%- if bk_stts.icon == '3' and bk_stts.img != blank -%}<img class="lazyload" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" data-src="{{ bk_stts.img | img_url: '30x' }}" alt="{{settings.img.alt | default:'fire sale' }}">{%- else -%}<i class="las la-{{bk_stts.icon_name}}"></i>{%- endif -%}</span>
+            {%- endif -%}
+            <span class="has_ship">Free Shipping For Over <span class="clc"><span class="money">$100</span></span> to</span><span class="no_ship">This item no ship to</span> <span class="country_user txt_under in_flex al_center flagst4 flagst4-smn lazyload"></span>
+          </div>
+      {%- endcomment -%}
+
+      {%- comment %}Free Shipping For Over [money] to [country]{%- endcomment %}
+      {%- comment %}This item no ship to [country]{%- endcomment %}
+
+    {%- when 'order' -%}
+      {%- unless no_sold_out %}{% continue %}{% endunless -%}
+      <div
+        id="delivery{{call_cl}}"
+        class="prt_delivery dn cd"
+        data-timezone="false"
+        data-frm="{{bk_stts.frm}}"
+        data-mode="{{bk_stts.mode}}"
+        data-cut="{{bk_stts.cut}}"
+        data-ds="{{pr_metafields_meta.estimateStartDate | default:bk_stts.ds}}"
+        data-de="{{pr_metafields_meta.estimateEndDate | default:bk_stts.de}}"
+        data-time="{{bk_stts.time}}"
+      >
+        {%- if bk_stts.icon == '2' or bk_stts.icon == '3' -%}
+          {%- if bk_stts.icon == '3' and bk_stts.img != blank -%}
+            <img
+              class="lazyload img_w25 w__100 fading_{{bk_stts.fade}} mr__5"
+              src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=="
+              data-src="{{ bk_stts.img | img_url: '50x' }}"
+              alt="{{bk_stts.img.alt | default:'kalles sale' }}"
+            >
+          {%- else -%}
+            <i class="las la-{{bk_stts.icon_name}} fading_{{bk_stts.fade}} fs__20 mr__5"></i>
+          {%- endif -%}
+        {%- endif -%}
+        {{
+          bk_stts.txt
+          | replace: '[hour]', '<span class="h_delivery clc"></span>'
+          | replace: '[date_start]', '<span class="start_delivery fwm txt_under"></span>'
+          | replace: '[date_end]', '<span class="end_delivery fwm txt_under"></span>'
+        }}
+        <span class="dn hr">{{ bk_stts.hr }}</span><span class="dn min">{{ bk_stts.min }}</span>
+      </div>
+
+    {%- when 'html' -%}
+      {%- if bk_stts.page == blank %}{% continue %}{% endif -%}
+      <div class="custom_{{block.id}}">{{ pages[bk_stts.page].content }}</div>
+
+    {%- when 'text' -%}
+      {% if bk_stts.text == blank %}{% continue %}{% endif -%}
+      <div class="richtext_{{block.id}}">{{ bk_stts.text }}</div>
+
+      {%- comment -%}
+        {%- when 'metafield' -%}
+          {%- if pr_metafields_meta.option -%}{%- continue -%}{%- endif -%}
+          <div class="meta_{{block.id}}">{{pr_metafields_meta.option}}</div>
+      {%- endcomment -%}
+  {%- endcase -%}
+{%- endfor -%}
+{%- if call_cl == '_qv' -%}
+  <a href="{{product.url | within: collection}}" class="btn fwsb detail_link">
+    {{- 'products.product.product_view_details' | t }}
+    <i class="facl facl-right"></i
+  ></a>
+{%- endif -%}
+
+{%- schema -%}
+{
+  "name": "Product summary",
+  "class": "summary entry-summary mt__30",
+  "max_blocks": 30,
+  "blocks": [
+    {
+      "type": "title",
+      "name": "Product Title",
+      "limit": 1,
+      "settings": [
+          {
+            "type": "range",
+            "id": "size",
+            "min": 10,
+            "max": 60,
+            "step": 1,
+            "label": "Font size",
+            "unit": "px",
+            "default": 16
+          }
+      ]
+    },
+    {
+      "type": "pricereview",
+      "name": "Product Price, reivew",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "select",
+          "id": "price",
+          "options": [
+            {
+              "value": "0",
+              "label": "None"
+            },
+            {
+              "value": "1",
+              "label": "$39.00 – $59.00"
+            },
+            {
+              "value": "2",
+              "label": "From $39.00"
+            }
+          ],
+          "label": "Price varies settings",
+          "default": "0"
+        },
+        {
+         "type": "checkbox",
+         "id": "rating",
+         "label": "Use Rating?",
+         "default": true
+        }
+      ]
+    },
+    {
+      "type": "des",
+      "name": "Description",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "select",
+          "id": "des",
+          "options": [
+            {
+              "value": "1",
+              "label": "Full description"
+            },
+            {
+              "value": "2",
+              "label": "Short description"
+            }
+          ],
+          "label": "Description mode:",
+          "default": "2"
+        },
+        {
+          "type": "paragraph",
+          "content": "—————————————————"
+        },
+        {
+          "type": "paragraph",
+          "content": "== Short description settings:"
+        },
+        {
+          "type": "page",
+          "id": "page",
+          "label": "Short description page",
+          "info": "This page content will appear. Short description page that will be displayed for each product content if you don't set metafield excerpt for each product content."
+        },
+      {
+        "type": "range",
+        "id": "length",
+        "min": 1,
+        "max": 100,
+        "step": 1,
+        "label": "Excerpt length (integer)",
+        "info": "Number of words that will be displayed for each product content if you don't set short description page or set metafield excerpt for each product content.",
+        "default": 31
+      },
+      {
+       "type": "checkbox",
+       "id": "readm",
+       "label": "Use Read more?",
+       "default": false
+      },
+      {
+       "type": "text",
+       "id": "readm_txt",
+       "label": "Read more title",
+       "default": "Read more"
+      }
+      ]
+    },
+    {
+      "type": "frm",
+      "name": "Product Form",
+      "limit": 1,
+      "settings": [
+       {
+         "type": "select",
+         "id": "ani",
+         "options": [
+           {
+             "value": "none",
+             "label": "None"
+           },
+           {
+             "value": "bounce",
+             "label": "Bounce"
+           },
+           {
+             "value": "tada",
+             "label": "Tada"
+           },
+           {
+             "value": "swing",
+             "label": "Swing"
+           },
+           {
+             "value": "flash",
+             "label": "Flash"
+           },
+           {
+             "value": "fadeIn",
+             "label": "FadeIn"
+           },
+           {
+             "value": "heartBeat",
+             "label": "HeartBeat"
+           },
+           {
+             "value": "shake",
+             "label": "Shake"
+           }
+         ],
+         "label": "Add to cart animation"
+       },
+        {
+          "type": "range",
+          "id": "time",
+          "min": 2,
+          "max": 40,
+          "step": 1,
+          "label": "Loop time (seconnds)",
+          "info": "Loop time add to cart animation",
+          "unit": "sec",
+          "default": 6
+        },
+       {
+         "type": "select",
+         "id": "btn_des",
+         "options": [
+           {
+             "value": "1",
+             "label": "Design 1"
+           },
+           {
+             "value": "2",
+             "label": "Design 2"
+           },
+           {
+             "value": "3",
+             "label": "Design 3"
+           }
+         ],
+         "label": "Button Design"
+       },
+       {
+          "type": "select",
+          "id": "btn_txt",
+          "default": "3",
+          "options": [
+            {
+              "value": "0",
+              "label": "None"
+            },
+            {
+              "value": "1",
+              "label": "Lowercase"
+            },
+            {
+              "value": "2",
+              "label": "Capitalize"
+            },
+            {
+              "value": "3",
+              "label": "Uppercase"
+            }
+          ],
+          "label": "Button transform Text:"
+       },
+       {
+         "type": "header",
+         "content": "Product Swatch"
+       },
+       {
+         "type": "select",
+         "id": "swatch_design",
+         "default": "2",
+         "options": [
+           {
+             "group": "Circle:",
+             "value": "1",
+             "label": "Circle"
+           },
+           {
+             "group": "Circle:",
+             "value": "2",
+             "label": "Circle + color"
+           },
+           {
+             "group": "Radio:",
+             "value": "3",
+             "label": "Radio"
+           },
+           {
+             "group": "Radio:",
+             "value": "4",
+             "label": "Radio + color"
+           },
+           {
+             "group": "Radio:",
+             "value": "5",
+             "label": "Radio full width"
+           },
+           {
+             "group": "Radio:",
+             "value": "6",
+             "label": "Radio full width + color"
+           },
+           {
+             "group": "Rectangle:",
+             "value": "7",
+             "label": "Rectangle"
+           },
+           {
+             "group": "Rectangle:",
+             "value": "8",
+             "label": "Rectangle + color"
+           },
+           {
+             "group": "Simple:",
+             "value": "9",
+             "label": "Simple"
+           },
+           {
+             "group": "Simple:",
+             "value": "10",
+             "label": "Simple + color"
+           }
+         ],
+         "label": "Swatch design setting"
+       },
+       {
+         "type": "select",
+         "id": "style_color",
+         "options": [
+           {
+             "value": "1",
+             "label": "Swatch color circle"
+           },
+           {
+             "value": "2",
+             "label": "Swatch color square"
+           }
+         ],
+         "label": "Swatch color setting for Design"
+       },
+       {
+         "type": "select",
+         "id": "swatch_style",
+         "options": [
+           {
+             "value": "1",
+             "label": "Swatch color (Default or Upload)"
+           },
+           {
+             "value": "2",
+             "label": "Swatch image variant"
+           }
+         ],
+         "label": "Swatch Layout setting for color/img"
+       },
+       {
+         "type": "select",
+         "id": "swatch_size",
+         "options": [
+           {
+             "value": "small",
+             "label": "Small"
+           },
+           {
+             "value": "medium",
+             "label": "Medium"
+           },
+           {
+             "value": "large",
+             "label": "Large"
+           },
+           {
+             "value": "exlarge",
+             "label": "Extra Large"
+           }
+         ],
+         "label": "Swatch color setting for size",
+         "default": "medium"
+       },
+       {
+         "type": "checkbox",
+         "id": "show_qty",
+         "label": "Show quantity selector",
+         "default": true
+       },
+       {
+         "type": "checkbox",
+         "id": "btn_atc_full",
+         "label": "Use Add to cart full width?",
+         "default": false
+       },
+       {
+         "type": "checkbox",
+         "id": "enable_payment_btn",
+         "label": "Show dynamic checkout button",
+         "info": "Lets customers check out directly using a familiar payment method. [Learn more](https:\/\/help.shopify.com\/manual\/using-themes\/change-the-layout\/dynamic-checkout)",
+         "default": false
+       }
+      ]
+    },
+    {
+      "type": "size",
+      "name": "Size Chart, Delivery, Ask",
+      "limit": 1,
+      "settings": [
+       {
+         "type": "header",
+         "content": "== Size Chart"
+       },
+       {
+         "type": "select",
+         "id": "size_chart",
+         "label": "Show Size chart:",
+         "default": "3",
+         "options": [
+           {
+             "value": "1",
+             "label": "None"
+           },
+           {
+             "value": "2",
+             "label": "Only product has variant name 'size'"
+           },
+           {
+             "value": "3",
+             "label": "All product"
+           }
+         ]
+       },
+      {
+        "type": "select",
+        "id": "sc_type",
+        "default": "1",
+        "options": [
+          {
+            "value": "1",
+            "label": "HTML"
+          },
+          {
+            "value": "2",
+            "label": "IMAGE"
+          }
+        ],
+        "label": "Size Chart Type: "
+      },
+      {
+        "type": "paragraph",
+        "content": "—————————————————"
+      },
+      {
+        "type": "page",
+        "id": "page",
+        "label": "HTML Size Chart",
+        "info": "This page content will appear."
+      },
+      {
+        "type": "paragraph",
+        "content": "—————————————————"
+       },
+       {
+         "type": "image_picker",
+         "id": "image",
+         "label": "IMAGE Size Chart"
+       },
+       {
+        "type": "paragraph",
+        "content": "—————————————————"
+       },
+       {
+         "type": "textarea",
+         "id": "size_ck",
+         "label": "Enter variant name you want has size guide",
+         "info": "Eg: size,sizes,Größe"
+       },
+       {
+         "type": "header",
+         "content": "== Delivery & Return"
+       },
+       {
+         "type": "checkbox",
+         "id": "delivery",
+         "label": "Show Delivery & Return?",
+         "default": false
+       },
+       {
+         "type": "page",
+         "id": "page_dr",
+         "label": "Add page Delivery & Return",
+          "info": "This page content will appear."
+       },
+       {
+         "type": "header",
+         "content": "== Ask a question"
+       },
+       {
+         "type": "checkbox",
+         "id": "ask",
+         "label": "Show Ask a question?",
+         "default": false
+       }/*,
+       {
+         "type": "page",
+         "id": "page_ask",
+         "label": "Add page Ask a question"
+       }*/
+      ]
+    },
+    {
+      "type": "meta",
+      "name": "Product meta",
+      "limit": 1,
+      "settings": [
+       {
+         "type": "checkbox",
+         "id": "show_pr_vendor",
+         "label": "Show Product vendors",
+         "default": true
+       },
+       {
+         "type": "checkbox",
+         "id": "show_sku",
+         "label": "Show Sku?",
+         "default": true
+       },
+       {
+         "type": "checkbox",
+         "id": "show_available",
+         "label": "Show Available?",
+         "default": true
+       },
+       {
+         "type": "checkbox",
+         "id": "show_category_product",
+         "label": "Show Category product?",
+         "default": true
+       },
+       {
+         "type": "checkbox",
+         "id": "show_tag_product",
+         "label": "Show product's tags?",
+         "default": true
+       }
+      ]
+    },
+    {
+      "type":"three_icons",
+      "name": "Three Icons",
+      "settings":[
+        {
+          "type":"image_picker",
+          "label":"First Icon",
+          "id":"first__img"
+        },
+        {
+          "type":"text",
+          "label":"First Icon Text",
+          "id":"first__icon"
+        },
+        {
+          "type":"image_picker",
+          "label":"Second Icon",
+          "id":"sec__img"
+        },
+        {
+          "type":"text",
+          "label":"Second Icon Text",
+          "id":"sec__icon"
+        },
+        {
+          "type":"image_picker",
+          "label":"Third Icon",
+          "id":"thrd__img"
+        },
+        {
+          "type":"text",
+          "label":"First Icon Text",
+          "id":"thrd__icon"
+        }
+      ]
+    },
+    {
+      "type":"accordions",
+      "name":"Accordions",
+      "settings":[
+{
+  "type": "text",
+  "label": "First Accordion Heading",
+  "id": "first_acc_head"
+},
+{
+  "type": "richtext",
+  "label": "First Accordion Content",
+  "id": "first_acc_content"
+},
+{
+  "type": "text",
+  "label": "Second Accordion Heading",
+  "id": "second_acc_head"
+},
+{
+  "type": "richtext",
+  "label": "Second Accordion Content",
+  "id": "second_acc_content"
+},
+{
+  "type": "text",
+  "label": "Third Accordion Heading",
+  "id": "third_acc_head"
+},
+{
+  "type": "richtext",
+  "label": "Third Accordion Content",
+  "id": "third_acc_content"
+}
+      ]
+    },
+    {
+      "type": "social",
+      "name": "Product social",
+      "limit": 1,
+      "settings": [
+       {
+         "type": "select",
+         "id": "class",
+         "label": "Social align",
+         "default": "tc",
+         "options": [
+           {
+             "value": "tdf",
+             "label": "Default"
+           },
+           {
+             "value": "tc",
+             "label": "Center"
+           }
+         ]
+       }
+       ]
+    },
+    {
+      "type": "countdown",
+      "name": "Countdown Timer",
+      "limit": 1,
+      "settings": [
+       {
+         "type": "paragraph",
+         "content": "Display a countdown timer in your product page."
+       },
+       {
+          "type": "select",
+          "id": "source",
+          "label": "Show Countdown Timer:",
+          "default": "1",
+          "options": [
+            {
+              "value": "1",
+              "label": "All products"
+            },
+            {
+              "value": "2",
+              "label": "Only product had tag 'has_stock_countdown'"
+            }
+          ]
+        },
+       /*{
+         "type": "checkbox",
+         "id": "timezone",
+         "label": "Use General timezone?",
+         "info":"Use to display a countdown accordingly to the General timezone no matter the localtime your computer is.",
+         "default": false
+       },*/
+       {
+         "type": "checkbox",
+         "id": "loop",
+         "label": "Use loop countdown?",
+         "info":"Only for countdown Timer Loop In A Day",
+         "default": false
+       },
+       {
+          "type": "select",
+          "id": "icon",
+          "label": "ICON / IMG:",
+          "default": "2",
+          "options": [
+            {
+              "value": "1",
+              "label": "None"
+            },
+            {
+              "value": "2",
+              "label": "Icon"
+            },
+            {
+              "value": "3",
+              "label": "Image"
+            }
+          ]
+        },
+       {
+         "type": "text",
+         "id": "icon_name",
+         "label": "Icon name",
+         "default": "stopwatch",
+         "info": "[Get name icon](https://icons8.com/line-awesome)"
+       },
+       {
+         "type": "image_picker",
+         "id": "img",
+         "label": "Image",
+         "info": "25x25 recommend"
+       },
+       {
+         "type": "checkbox",
+         "id": "fade",
+         "label": "Use fade animation?",
+         "default": true
+       },
+       {
+          "type": "select",
+          "id": "al",
+          "label": "Text Align",
+          "default": "tc",
+          "options": [
+            {
+              "value": "tl",
+              "label": "Text left"
+            },
+            {
+              "value": "tc",
+              "label": "Text center"
+            },
+            {
+              "value": "tr",
+              "label": "Text right"
+            }
+          ]
+        },
+       {
+         "type": "textarea",
+         "id": "mess",
+         "label": "Message",
+         "default": "Hurry up! Sale Ends in",
+         "placeholder": "Hurry up! Sale Ends in"
+       },
+        {
+          "type": "range",
+          "id": "size",
+          "min": 14,
+          "max": 50,
+          "step": 1,
+          "label": "Font size",
+          "unit": "px",
+          "default": 16
+        },
+       {
+         "type": "textarea",
+         "id": "stock_time",
+         "label": "Countdown Timer Loop In A Day",
+         "default": "8:00:00,16:00:00,23:59:59",
+         "placeholder": "8:00:00,16:00:00,23:59:59"
+       },
+       {
+         "type": "text",
+         "id": "day",
+         "label": "Days",
+         "default": "days",
+         "placeholder": "days"
+       },
+       {
+         "type": "text",
+         "id": "hr",
+         "label": "Hours",
+         "default": "hours",
+         "placeholder": "hours"
+       },
+       {
+         "type": "text",
+         "id": "min",
+         "label": "mins",
+         "default": "mins",
+         "placeholder": "mins"
+       },
+       {
+         "type": "text",
+         "id": "sec",
+         "label": "Secs",
+         "default": "secs",
+         "placeholder": "secs"
+       },
+       {
+         "type": "paragraph",
+         "content": "Hour of the day, 24-hour clock (00..23), Minute of the hour (00..59), Second of the minute (00..59)"
+       },
+       {
+         "type": "select",
+         "id": "cd_style",
+         "label": "Countdown Design",
+         "default": "dark",
+         "options": [
+           {
+             "value": "light",
+             "label": "Light"
+           },
+           {
+             "value": "dark",
+             "label": "Dark"
+           },
+           {
+             "value": "dark_2",
+             "label": "Dark 2"
+           },
+           {
+             "value": "dark_3",
+             "label": "Dark 3"
+           }
+         ]
+       },
+       {
+         "type": "paragraph",
+         "content": "Metafields product countdown, Countdown to the end sale date will be shown. Be sure you have set final date of the product sale price. pr_metafields_meta.countdown ( 2019/08/18 ) or ( 2019/08/18 17:34:56 ) or ( 2019/08/18 07:00:00,2019/08/20 17:34:56,2019/08/25 18:30:25 )"
+       }
+      ]
+    },
+    {
+      "type": "stock",
+      "name": " Inventory Quantity",
+      "limit": 1,
+      "settings": [
+          {
+            "type": "paragraph",
+            "content": "Display the stock level of your product variant."
+          },
+         {
+            "type": "select",
+            "id": "icon",
+            "label": "ICON / IMG:",
+            "default": "2",
+            "options": [
+              {
+                "value": "1",
+                "label": "None"
+              },
+              {
+                "value": "2",
+                "label": "Icon"
+              },
+              {
+                "value": "3",
+                "label": "Image"
+              }
+            ]
+          },
+         {
+           "type": "text",
+           "id": "icon_name",
+           "label": "Icon name",
+           "default": "hourglass-half",
+           "info": "[Get name icon](https://icons8.com/line-awesome)"
+         },
+         {
+           "type": "image_picker",
+           "id": "img",
+           "label": "Image",
+           "info": "25x25 recommend"
+         },
+         {
+           "type": "checkbox",
+           "id": "fade",
+           "label": "Use fade animation?",
+           "default": true
+         },
+         {
+            "type": "select",
+            "id": "st",
+            "label": "== Stock:",
+            "default": "3",
+            "options": [
+              {
+                "value": "1",
+                "label": "Only default"
+              },
+              {
+                "value": "2",
+                "label": "Only random"
+              },
+              {
+                "value": "3",
+                "label": "Default + Random"
+              }
+            ]
+          },
+          {
+            "type": "header",
+            "content": "== Default"
+          },
+          {
+            "type": "range",
+            "id": "qty",
+            "min": 1,
+            "max": 100,
+            "step": 1,
+            "unit": "Qty",
+            "label": "(X) items",
+            "info": "Show when less than (X) items are in stock",
+            "default": 10
+          },
+          {
+            "type": "header",
+            "content": "== Random"
+          },
+          {
+            "type": "range",
+            "id": "total_items",
+            "label": "Total items",
+            "min": 10,
+            "max": 100,
+            "step": 10,
+            "default": 100
+          },
+          {
+            "type": "range",
+            "id": "stock_from",
+            "label": "from",
+            "min": 1,
+            "max": 19,
+            "step": 1,
+            "default": 12
+          },
+          {
+            "type": "range",
+            "id": "stock_to",
+            "label": "to",
+            "min": 20,
+            "max": 70,
+            "step": 1,
+            "default": 20
+          },
+          {
+            "type": "header",
+            "content": "Translate labels"
+          },
+         {
+            "type": "select",
+            "id": "al",
+            "label": "Text Align",
+            "default": "tc",
+            "options": [
+              {
+                "value": "tl",
+                "label": "Left"
+              },
+              {
+                "value": "tc",
+                "label": "Center"
+              },
+              {
+                "value": "tr",
+                "label": "Right"
+              }
+            ]
+          },
+          {
+            "type": "textarea",
+            "id": "mess",
+            "label": "Message (You can leave it blank)",
+            "info": "Hurry! Only [stock_number] left in stock.",
+            "placeholder": "Hurry! Only [stock_number] left in stock.",
+            "default": "HURRY! ONLY [stock_number] LEFT IN STOCK."
+          },
+          {
+            "type": "range",
+            "id": "size",
+            "min": 10,
+            "max": 35,
+            "step": 1,
+            "label": "Font size",
+            "unit": "px",
+            "default": 16
+          },
+          {
+            "type": "paragraph",
+            "content": "—————————————————"
+          },
+          {
+           "type": "checkbox",
+           "id": "reduce",
+           "label": "Enable gradually reduce the amount of inventory?",
+           "default": true
+          },
+          {
+            "type": "paragraph",
+            "content": "—————————————————"
+          },
+          {
+           "type": "checkbox",
+           "id": "progress",
+           "label": "Show progress bar?",
+           "default": true
+          },
+          {
+            "type": "range",
+            "id": "wbar",
+            "min": 40,
+            "max": 100,
+            "step": 1,
+            "unit": "%",
+            "label": "Width progress bar",
+            "default": 100
+          },
+          {
+            "type": "color",
+            "id": "stock_bg_process",
+            "label": "Process color",
+            "default": "#f76b6a"
+          },
+          {
+            "type": "color",
+            "id": "bgten",
+            "label": "Less than 10 color",
+            "default": "#ec0101"
+          },
+          {
+            "type": "color",
+            "id": "stock_bg",
+            "label": "Background color",
+            "default": "#ffe8e8"
+          }
+      ]
+    },
+    {
+      "type": "img",
+      "name": "Trust Badge",
+      "limit": 1,
+      "settings": [
+       {
+         "type": "textarea",
+         "id": "mess",
+         "label": "Message",
+         "default": "Guaranteed Safe Checkout",
+         "placeholder": "Guaranteed Safe Checkout"
+       },
+        {
+          "type": "range",
+          "id": "size",
+          "min": 10,
+          "max": 60,
+          "step": 1,
+          "label": "Font size",
+          "unit": "px",
+          "default": 16
+        },
+       {
+          "type": "select",
+          "id": "source",
+          "label": "Source IMG:",
+          "default": "1",
+          "options": [
+            {
+              "value": "1",
+              "label": "Image"
+            },
+            {
+              "value": "2",
+              "label": "SVG"
+            }
+          ]
+        },
+        {
+          "type": "header",
+          "content": "== Image"
+        },
+       {
+         "type": "image_picker",
+         "id": "image",
+         "label": "Trust seal image"
+       },
+       {
+          "type": "select",
+          "id": "al",
+          "label": "Image Align",
+          "default": "tl",
+          "options": [
+            {
+              "value": "tl",
+              "label": "Left"
+            },
+            {
+              "value": "tc",
+              "label": "Center"
+            },
+            {
+              "value": "tr",
+              "label": "Right"
+            }
+          ]
+        },
+        {
+          "type": "range",
+          "id": "wimg",
+          "min": 40,
+          "max": 100,
+          "step": 1,
+          "unit": "%",
+          "label": "Width image",
+          "default": 60
+        },
+        {
+          "type": "header",
+          "content": "== SVG"
+        },
+       {
+         "type": "textarea",
+         "id": "svg",
+         "label": "SVG list",
+         "default": "amazon_payments,american_express,apple_pay,bitcoin,dankort,diners_club,discover,dogecoin,dwolla,forbrugsforeningen,interac,google_pay,jcb,klarna,klarna-pay-later,litecoin,maestro,master,paypal,shopify_pay,sofort,visa",
+         "info": "amazon_payments,american_express,apple_pay,bitcoin,dankort,diners_club,discover,dogecoin,dwolla,forbrugsforeningen,interac,google_pay,jcb,klarna,klarna-pay-later,litecoin,maestro,master,paypal,shopify_pay,sofort,visa"
+       },
+      {
+        "type": "range",
+        "id": "height",
+        "min": 1,
+        "max": 100,
+        "step": 1,
+        "label": "Height",
+        "unit": "px",
+        "default": 50
+      }
+      ]
+    },
+    {
+      "type": "store_avai",
+      "name": "Pickup availability",
+      "limit": 1,
+      "settings": [
+       {
+          "type": "paragraph",
+          "content":"Engage local shoppers by showing where items are available for pickup — right from the product page."
+       }
+       ]
+    },
+    {
+      "type": "time",
+      "name": "Live view",
+      "limit": 1,
+      "settings": [
+       {
+          "type": "paragraph",
+          "content":"Display fake the number of people viewing your product page."
+       },
+       {
+          "type": "select",
+          "id": "icon",
+          "label": "ICON / IMG:",
+          "default": "2",
+          "options": [
+            {
+              "value": "1",
+              "label": "None"
+            },
+            {
+              "value": "2",
+              "label": "Icon"
+            },
+            {
+              "value": "3",
+              "label": "Image"
+            }
+          ]
+        },
+       {
+         "type": "text",
+         "id": "icon_name",
+         "label": "Icon name",
+         "default": "eye",
+         "info": "[Get name icon](https://icons8.com/line-awesome)"
+       },
+       {
+         "type": "image_picker",
+         "id": "img",
+         "label": "Image",
+         "info": "25x25 recommend"
+       },
+       {
+         "type": "checkbox",
+         "id": "fade",
+         "label": "Use fade animation?",
+         "default": true
+       },
+       {
+         "type": "range",
+         "id": "min",
+         "min": 1,
+         "max": 100,
+         "step": 1,
+         "label": "MIn fake real time Visitor",
+         "default": 1
+       },
+       {
+         "type": "range",
+         "id": "max",
+         "min": 10,
+         "max": 1000,
+         "step": 10,
+         "label": "Max fake real time Visitor",
+         "default": 100
+       },
+       {
+         "type": "range",
+         "id": "time",
+         "min": 1,
+         "max": 20,
+         "step": 1,
+         "unit": "sec",
+         "label": "Interval time",
+         "default": 2
+       },
+       {
+         "type": "textarea",
+         "id": "text",
+         "label": "Text",
+         "default": "[count] <span class=\"cd fwm\">People<\/span> are viewing this right now"
+       }
+      ]
+    },
+    {
+      "type": "sold",
+      "name": "Total sold flash",
+      "limit": 1,
+      "settings": [
+       {
+          "type": "select",
+          "id": "icon",
+          "label": "ICON / IMG:",
+          "default": "2",
+          "options": [
+            {
+              "value": "1",
+              "label": "None"
+            },
+            {
+              "value": "2",
+              "label": "Icon"
+            },
+            {
+              "value": "3",
+              "label": "Image"
+            }
+          ]
+        },
+       {
+         "type": "text",
+         "id": "icon_name",
+         "label": "Icon name",
+         "default": "fire",
+         "info": "[Get name icon](https://icons8.com/line-awesome)"
+       },
+       {
+         "type": "image_picker",
+         "id": "img",
+         "label": "Image",
+         "info": "25x25 recommend"
+       },
+       {
+         "type": "checkbox",
+         "id": "fade",
+         "label": "Use fade animation?",
+         "default": true
+       },
+       {
+         "type": "range",
+         "id": "mins",
+         "min": 1,
+         "max": 100,
+         "step": 1,
+         "unit": "qty",
+         "label": "Min Quantity",
+         "default": 5
+       },
+       {
+         "type": "range",
+         "id": "maxs",
+         "min": 10,
+         "max": 110,
+         "step": 1,
+         "unit": "qty",
+         "label": "Max Quantity",
+         "default": 25
+       },
+       {
+         "type": "range",
+         "id": "mint",
+         "min": 1,
+         "max": 24,
+         "step": 1,
+         "unit": "h",
+         "label": "Min Time",
+         "default": 3
+       },
+       {
+         "type": "range",
+         "id": "maxt",
+         "min": 1,
+         "max": 24,
+         "step": 1,
+         "unit": "h",
+         "label": "Max Time",
+         "default": 24
+       },
+       {
+         "type": "textarea",
+         "id": "text",
+         "label": "Text",
+         "info": "[sold] sold in last [hour] hours",
+         "default": "[sold] sold in last [hour] hours"
+       }
+      ]
+    },
+    /*{
+      "type": "free",
+      "name": "Free Shipping Text",
+      "limit": 1,
+      "settings": [
+       {
+          "type": "select",
+          "id": "icon",
+          "label": "ICON / IMG:",
+          "default": "2",
+          "options": [
+            {
+              "value": "1",
+              "label": "None"
+            },
+            {
+              "value": "2",
+              "label": "Icon"
+            },
+            {
+              "value": "3",
+              "label": "Image"
+            }
+          ]
+        },
+       {
+         "type": "image_picker",
+         "id": "img",
+         "label": "Icon",
+         "info": "15x13 recommend"
+       },
+       {
+         "type": "checkbox",
+         "id": "fade",
+         "label": "Use fade animation?",
+         "default": true
+       },
+       {
+         "type": "color",
+         "id": "color",
+         "label": "Color Primary",
+         "default": "#0076bb"
+       },
+       {
+         "type": "textarea",
+         "id": "text",
+         "label": "Shipping Text",
+         "info":"Free Shipping For Over [money] to [country] [flag]",
+         "default": "Free Shipping For Over $100"
+       }
+      ]
+    },*/
+    {
+      "type": "order",
+      "name": "Delivery Time",
+      "limit": 1,
+      "settings": [
+       {
+          "type": "paragraph",
+          "content":"Display an approximate date of delivery."
+       },
+       {
+          "type": "select",
+          "id": "icon",
+          "label": "ICON / IMG:",
+          "default": "2",
+          "options": [
+            {
+              "value": "1",
+              "label": "None"
+            },
+            {
+              "value": "2",
+              "label": "Icon"
+            },
+            {
+              "value": "3",
+              "label": "Image"
+            }
+          ]
+       },
+       {
+         "type": "text",
+         "id": "icon_name",
+         "label": "Icon name",
+         "default": "truck",
+         "info": "[Get name icon](https://icons8.com/line-awesome)"
+       },
+       {
+         "type": "image_picker",
+         "id": "img",
+         "label": "Image",
+         "info": "25x25 recommend"
+       },
+       {
+         "type": "checkbox",
+         "id": "fade",
+         "label": "Use fade animation?",
+         "default": true
+       },
+       {
+         "type": "textarea",
+         "id": "txt",
+         "label": "Delivery Text",
+         "default": "Order in the next [hour] to get it between [date_start] and [date_end]",
+         "info":"Order in the next [hour] to get this to you between [date_start] and [date_end], Order in the next [hour] to get it by [date_end], Order in the next [hour] to get it soon"
+       },
+       {
+         "type": "range",
+         "id": "ds",
+         "min": 0,
+         "max": 99,
+         "step": 1,
+         "label": "Delivery Start Date",
+         "info": "From Current date",
+         "default": 10
+       },
+       {
+         "type": "range",
+         "id": "de",
+         "min": 0,
+         "max": 99,
+         "step": 1,
+         "label": "Delivery End Date",
+         "info": "From Current date",
+         "default": 15
+       },
+       {
+         "type": "select",
+         "id": "mode",
+         "default": "1",
+         "options": [
+           {
+             "value": "1",
+             "label": "Only Delivery"
+           },
+           {
+             "value": "2",
+             "label": "Shipping + Delivery"
+           }
+         ],
+         "label": "Exclude Days From"
+       },
+       {
+         "type": "text",
+         "id": "cut",
+         "label": "Exclude Days",
+         "default": "SAT,SUN",
+         "info": "Use the 'MON','TUE','WED','THU','FRI','SAT' and 'SUN'. Separate exclude days with a comma (,)."
+       },
+       {
+         "type": "select",
+         "id": "frm",
+         "default": "1",
+         "options": [
+           {
+             "value": "1",
+             "label": "Wednesday, 19th April"
+           },
+           {
+             "value": "12",
+             "label": "Wednesday, 19 April"
+           },
+           {
+             "value": "2",
+             "label": "Wednesday, 19th April 2019"
+           },
+           {
+             "value": "3",
+             "label": "Wednesday, 19th April, 2019"
+           },
+           {
+             "value": "4",
+             "label": "Wednesday, April 19th, 2019"
+           },
+           {
+             "value": "5",
+             "label": "Wednesday, April 19th"
+           },
+           {
+             "value": "6",
+             "label": "Wednesday, April 19th 2019"
+           },
+           {
+             "value": "7",
+             "label": "Wednesday, April 19"
+           },
+           {
+             "value": "8",
+             "label": "Wednesday, April 19 2019"
+           },
+           {
+             "value": "9",
+             "label": "Wednesday, 04/19/2019"
+           },
+           {
+             "value": "10",
+             "label": "Wednesday, 19/04/2019"
+           },
+           {
+             "value": "20",
+             "label": "Wednesday, 2019/04/19"
+           }
+         ],
+         "label": "Date delivery format"
+       },
+       /*{
+         "type": "checkbox",
+         "id": "timezone",
+         "label": "Use General timezone?",
+         "info":"Use to display a countdown accordingly to the General timezone no matter the localtime your computer is.",
+         "default": false
+       },*/
+       {
+         "type": "text",
+         "id": "time",
+         "label": "Delivery Cut Off",
+         "info": "Number Only(24 Hours Format - 16:00:00 Means 4PM)",
+         "default": "16:00:00"
+       },
+       {
+         "type": "text",
+         "id": "hr",
+         "label": "Text hours",
+         "default": "hours"
+       },
+       {
+         "type": "text",
+         "id": "min",
+         "label": "Text minutes",
+         "default": "minutes"
+       }
+      ]
+    },
+    {
+      "type": "text",
+      "name": "Text",
+      "settings": [
+          {
+          "type": "richtext",
+          "id": "text",
+          "label": "Text",
+          "default": "<p>Use this text to share information about your brand with your customers. Describe a product, share announcements, or welcome customers to your store.</p>"
+          }
+       ]
+    },
+    {
+      "type": "html",
+      "name": "Custom HTML",
+      "settings": [
+        {
+          "type": "page",
+          "id": "page",
+          "label": "Content page",
+          "info": "This page content will appear."
+        }
+      ]
+    }
+ ],
+  "default": {
+    "blocks": [
+      { "type": "title" },{ "type": "pricereview" },{ "type": "des" },{ "type": "frm" },{ "type": "size" },{ "type": "meta" },{ "type": "social" }
+    ]
+  }
+}
+{%- endschema -%}
+<style>
+         .jdgm-widget.jdgm-widget {
+      display: block !IMPORTANT;
+  }
+
+  .jdgm-widget.jdgm-widget .jdgm-prev-badge[data-average-rating='0.00'] {
+      display: block !IMPORTANT;
+  }
+</style>

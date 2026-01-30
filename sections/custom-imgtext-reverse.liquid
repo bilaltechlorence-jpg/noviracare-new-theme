@@ -1,0 +1,50 @@
+{% assign title = product.metafields.custom.best_quality_section_title%}
+{% assign content = product.metafields.custom.best_quality_section_description%}
+
+<div class="custom_image_text_reverse" style="background-image:url({{ section.settings.bg | img_url : '' }})">
+  <div class="container">
+    <div class="custom_imgtext_left_col">
+      {% if section.settings.left_img != blank %}
+        <img src="{{ section.settings.left_img | img_url : '' }}">
+      {% endif %}
+    </div>
+    <div class="custom_img_text_rightcol">
+      {% if title != blank %}
+        <h2>{{ title }}</h2>
+      {% endif %}
+      {% if content != blank %}
+        <div class="cstm_imgrev_cont">
+          {{ content }}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Custom Image text reverse",
+  "settings": [
+    {
+      "type": "image_picker",
+      "label": "Background Image",
+      "id": "bg"
+    },
+    {
+      "type": "image_picker",
+      "label": "Left Column Image",
+      "id": "left_img"
+    },
+    {
+      "type": "text",
+      "label": "Heading",
+      "id": "head"
+    },
+    {
+      "type": "richtext",
+      "label": "Content",
+      "id": "content"
+    }
+  ]
+}
+{% endschema %}

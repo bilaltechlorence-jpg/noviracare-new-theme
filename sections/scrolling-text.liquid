@@ -1,0 +1,111 @@
+{% schema %}
+{
+  "name": "Scrolling Text",
+  "tag": "section",
+  "class": "scrolling-feature-bar",
+  "settings": [],
+  "blocks": [
+    {
+      "type": "text",
+      "name": "Feature",
+      "settings": [
+        {
+          "type": "text",
+          "label": "Feature text",
+          "id": "text"
+        }
+      ]
+    }
+  ],
+  "max_blocks": 20,
+  "presets": [
+    {
+      "name": "Scrolling Text",
+      "category": "Custom"
+    }
+  ]
+}
+{% endschema %}
+
+{% style %}
+  .scrolling-feature-bar {
+    overflow: hidden;
+    background-color: #00796b;
+    color: #fff;
+    padding: 5px 0;
+    font-weight: 600;
+    white-space: nowrap;
+    position: relative;
+  }
+
+  .scrolling-feature-bar__inner {
+    display: inline-block;
+    white-space: nowrap;
+    animation: scroll-left 200s linear infinite;
+  }
+
+  .scrolling-feature-bar__item {
+    display: inline-block;
+    margin-right: 60px;
+    font-size:15px
+  }
+
+  @keyframes scroll-left {
+    0% {
+      transform: translateX(0%);
+    }
+    100% {
+      transform: translateX(-100%);
+    }
+  }
+{% endstyle %}
+
+<div class="scrolling-feature-bar">
+  <div class="scrolling-feature-bar__inner">
+    {% for block in section.blocks %}
+      <span class="scrolling-feature-bar__item">{{ block.settings.text }}</span>
+    {% endfor %}
+    {% for block in section.blocks %}
+      <span class="scrolling-feature-bar__item">{{ block.settings.text }}</span>
+    {% endfor -%}
+    {%- for block in section.blocks %}
+      <span class="scrolling-feature-bar__item">{{ block.settings.text }}</span>
+    {% endfor %}
+    {% for block in section.blocks %}
+      <span class="scrolling-feature-bar__item">{{ block.settings.text }}</span>
+    {% endfor %}
+    {% for block in section.blocks %}
+      <span class="scrolling-feature-bar__item">{{ block.settings.text }}</span>
+    {% endfor %}
+    {% for block in section.blocks %}
+      <span class="scrolling-feature-bar__item">{{ block.settings.text }}</span>
+    {% endfor %}
+    {% for block in section.blocks %}
+      <span class="scrolling-feature-bar__item">{{ block.settings.text }}</span>
+    {% endfor %}
+    {% for block in section.blocks %}
+      <span class="scrolling-feature-bar__item">{{ block.settings.text }}</span>
+    {% endfor %}
+    {% for block in section.blocks %}
+      <span class="scrolling-feature-bar__item">{{ block.settings.text }}</span>
+    {% endfor %}
+    {% for block in section.blocks %}
+      <span class="scrolling-feature-bar__item">{{ block.settings.text }}</span>
+    {% endfor %}
+    {% for block in section.blocks %}
+      <span class="scrolling-feature-bar__item">{{ block.settings.text }}</span>
+    {% endfor %}
+    {% for block in section.blocks %}
+      <span class="scrolling-feature-bar__item">{{ block.settings.text }}</span>
+    {% endfor %}
+    {% for block in section.blocks %}
+      <span class="scrolling-feature-bar__item">{{ block.settings.text }}</span>
+    {% endfor %}
+    {% for block in section.blocks %}
+      <span class="scrolling-feature-bar__item">{{ block.settings.text }}</span>
+    {% endfor %}
+    {% for block in section.blocks %}
+      <span class="scrolling-feature-bar__item">{{ block.settings.text }}</span>
+    {% endfor %}
+  </div>
+</div>
