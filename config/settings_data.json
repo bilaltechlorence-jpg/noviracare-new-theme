@@ -615,7 +615,7 @@
             "type": "menu",
             "settings": {
               "title": "Useful links",
-              "menu": "",
+              "menu": "customer-account-main-menu",
               "order": "1",
               "cl": "2",
               "cl_tb": "6",
