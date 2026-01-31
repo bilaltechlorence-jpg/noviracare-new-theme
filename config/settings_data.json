@@ -593,7 +593,7 @@
             "type": "menu",
             "settings": {
               "title": "Categories",
-              "menu": "",
+              "menu": "footer",
               "order": "1",
               "cl": "2",
               "cl_tb": "6",
@@ -604,7 +604,7 @@
             "type": "menu",
             "settings": {
               "title": "Infomation",
-              "menu": "",
+              "menu": "main-menu",
               "order": "1",
               "cl": "2",
               "cl_tb": "6",
