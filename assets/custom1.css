@@ -210,33 +210,49 @@ html.yes-js.clvideo.clcsspositionsticky.clno-touchevents.clhovermq.browser-Chrom
 
 
 
+
 /* ===============================
-   PRODUCT IMAGE STICKY COLUMN
+   HARD RESET (Sticky Enabler)
    =============================== */
 
-.pr_sticky_content,
-.pr_sticky_content > .row,
-.pr_sticky_content .theiaStickySidebar {
+html, body {
+  height: auto !important;
   overflow: visible !important;
 }
 
-/* Sticky Image Column */
-.pr_sticky_img {
-  position: sticky;
-  top: 120px; /* fixed header ke liye safe value */
-  align-self: flex-start;
-  z-index: 2;
+/* Kill overflow + transform (sticky killers) */
+.pr_sticky_content,
+.pr_sticky_content *,
+.container,
+.row,
+[class*="col"] {
+  overflow: visible !important;
+  transform: none !important;
 }
 
-/* Prevent flickity breaking sticky */
+/* ===============================
+   PRODUCT IMAGE STICKY
+   =============================== */
+
+.pr_sticky_img {
+  position: -webkit-sticky !important;
+  position: sticky !important;
+  top: 120px; /* header height */
+  align-self: flex-start;
+  z-index: 9;
+}
+
+/* Flickity / slider fix */
 .pr_sticky_img .flickity-viewport {
   overflow: visible !important;
 }
 
-/* Desktop only – mobile UX safe */
+/* ===============================
+   MOBILE SAFE
+   =============================== */
 @media (max-width: 991px) {
   .pr_sticky_img {
-    position: static;
-    top: auto;
+    position: static !important;
+    top: auto !important;
   }
 }
