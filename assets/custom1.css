@@ -210,10 +210,33 @@ html.yes-js.clvideo.clcsspositionsticky.clno-touchevents.clhovermq.browser-Chrom
 
 
 
-.theiaStickySidebar,
-.row.theiaStickySidebar,
-.row.theiaStickySidebar.ok {
-    position: static !important;
-    top: auto !important;
-    transform: none !important;
+/* ===============================
+   PRODUCT IMAGE STICKY COLUMN
+   =============================== */
+
+.pr_sticky_content,
+.pr_sticky_content > .row,
+.pr_sticky_content .theiaStickySidebar {
+  overflow: visible !important;
+}
+
+/* Sticky Image Column */
+.pr_sticky_img {
+  position: sticky;
+  top: 120px; /* fixed header ke liye safe value */
+  align-self: flex-start;
+  z-index: 2;
+}
+
+/* Prevent flickity breaking sticky */
+.pr_sticky_img .flickity-viewport {
+  overflow: visible !important;
+}
+
+/* Desktop only – mobile UX safe */
+@media (max-width: 991px) {
+  .pr_sticky_img {
+    position: static;
+    top: auto;
+  }
 }
