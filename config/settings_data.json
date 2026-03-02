@@ -1659,6 +1659,31 @@
       },
       "header_banner": {
         "type": "header_banner",
+        "blocks": {
+          "text_KRd6dP": {
+            "type": "text",
+            "settings": {
+              "text": "Fast, Free Delivery"
+            }
+          },
+          "text_QxgD6t": {
+            "type": "text",
+            "settings": {
+              "text": "Easy Returns"
+            }
+          },
+          "text_bEBQ7i": {
+            "type": "text",
+            "settings": {
+              "text": "Free Shipping"
+            }
+          }
+        },
+        "block_order": [
+          "text_KRd6dP",
+          "text_QxgD6t",
+          "text_bEBQ7i"
+        ],
         "settings": {}
       },
       "cat_shop": {
