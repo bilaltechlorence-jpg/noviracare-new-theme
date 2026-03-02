@@ -438,7 +438,6 @@
         "blocks": {
           "header_top-0": {
             "type": "text",
-            "disabled": true,
             "settings": {
               "text": "<i class=\"pegk pe-7s-call\"></i> +01 23456789 <i class=\"pegk pe-7s-mail ml__15\"></i> <a class=\"cg\" href=\"mailto:kalles@domain.com\">Kalles@domain.com</a>",
               "hide": false,
@@ -447,7 +446,6 @@
           },
           "header_top-1": {
             "type": "text",
-            "disabled": true,
             "settings": {
               "text": "Summer sale discount off <span class=\"cr\">50%</span>! <a href=\"/collections/trending\">Shop Now</a>",
               "hide": false,
@@ -456,7 +454,6 @@
           },
           "header_top-2": {
             "type": "cur",
-            "disabled": true,
             "settings": {
               "hide": false,
               "col": "4"
