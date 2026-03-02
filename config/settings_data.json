@@ -74,7 +74,7 @@
     "logo_tr": "",
     "logo_tr_retina": "",
     "logo_tr_width": 100,
-    "h_banner": false,
+    "h_banner": true,
     "h_topbar": true,
     "full_header": false,
     "sticky_header": false,
@@ -438,6 +438,7 @@
         "blocks": {
           "header_top-0": {
             "type": "text",
+            "disabled": true,
             "settings": {
               "text": "<i class=\"pegk pe-7s-call\"></i> +01 23456789 <i class=\"pegk pe-7s-mail ml__15\"></i> <a class=\"cg\" href=\"mailto:kalles@domain.com\">Kalles@domain.com</a>",
               "hide": false,
@@ -446,6 +447,7 @@
           },
           "header_top-1": {
             "type": "text",
+            "disabled": true,
             "settings": {
               "text": "Summer sale discount off <span class=\"cr\">50%</span>! <a href=\"/collections/trending\">Shop Now</a>",
               "hide": false,
@@ -454,6 +456,7 @@
           },
           "header_top-2": {
             "type": "cur",
+            "disabled": true,
             "settings": {
               "hide": false,
               "col": "4"
@@ -1656,25 +1659,7 @@
       },
       "header_banner": {
         "type": "header_banner",
-        "settings": {
-          "link": "",
-          "text": "Today deal sale off <strong>70% </strong>. End in [countdown].  Hurry Up <i class=\"las la-arrow-right\"></i>",
-          "countdown": "2021/04/19",
-          "dayx": 0,
-          "effect": "1",
-          "au_time": 1,
-          "height": 41,
-          "fontsize": 12,
-          "cl": "#ffffff",
-          "bg": "#00432c",
-          "bg_op": 100,
-          "show_close": true,
-          "show_icon": false,
-          "txt_btn": "close",
-          "cl_btn": "#ffffff",
-          "ver": 1,
-          "date": 60
-        }
+        "settings": {}
       },
       "cat_shop": {
         "type": "cat_shop",
