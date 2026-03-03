@@ -1,123 +1,49 @@
-{% if section.settings.heading != blank or section.settings.content != blank %}
+{% assign title = product.metafields.custom.best_quality_section_title%}
+{% assign content = product.metafields.custom.best_quality_section_description%}
 
-<section class="best-quality-section"
-  {% if section.settings.bg != blank %}
-    style="background-image: url({{ section.settings.bg | image_url }});"
-  {% endif %}
->
+<div class="custom_image_text_reverse" style="background-image:url({{ section.settings.bg | img_url : '' }})">
   <div class="container">
-    <div class="best-quality-wrapper">
-
-      <!-- LEFT IMAGE -->
+    <div class="custom_imgtext_left_col">
       {% if section.settings.left_img != blank %}
-      <div class="best-quality-image">
-        <img 
-          src="{{ section.settings.left_img | image_url: width: 800 }}" 
-          alt="Best Quality Image">
-      </div>
+        <img src="{{ section.settings.left_img | img_url : '' }}">
       {% endif %}
-
-      <!-- RIGHT CONTENT -->
-      <div class="best-quality-content">
-
-        {% if section.settings.heading != blank %}
-          <h2>{{ section.settings.heading }}</h2>
-        {% endif %}
-
-        {% if section.settings.content != blank %}
-          <div class="best-quality-text">
-            {{ section.settings.content }}
-          </div>
-        {% endif %}
-
-      </div>
-
+    </div>
+    <div class="custom_img_text_rightcol">
+      {% if title != blank %}
+        <h2>{{ title }}</h2>
+      {% endif %}
+      {% if content != blank %}
+        <div class="cstm_imgrev_cont">
+          {{ content }}
+        </div>
+      {% endif %}
     </div>
   </div>
-</section>
-
-{% endif %}
-
-<style>
-.best-quality-section {
-  padding: 80px 20px;
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-}
-
-.container {
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-.best-quality-wrapper {
-  display: flex;
-  align-items: center;
-  gap: 60px;
-  flex-wrap: wrap;
-}
-
-.best-quality-image {
-  flex: 1;
-}
-
-.best-quality-image img {
-  width: 100%;
-  border-radius: 16px;
-  display: block;
-}
-
-.best-quality-content {
-  flex: 1;
-}
-
-.best-quality-content h2 {
-  font-size: 36px;
-  margin-bottom: 20px;
-}
-
-.best-quality-text {
-  font-size: 18px;
-  line-height: 1.6;
-}
-
-/* Mobile */
-@media (max-width: 768px) {
-  .best-quality-wrapper {
-    flex-direction: column;
-  }
-}
-</style>
+</div>
 
 {% schema %}
 {
-  "name": "Best Quality Section",
+  "name": "Custom Image text reverse",
   "settings": [
     {
       "type": "image_picker",
-      "id": "bg",
-      "label": "Background Image"
+      "label": "Background Image",
+      "id": "bg"
     },
     {
       "type": "image_picker",
-      "id": "left_img",
-      "label": "Left Column Image"
+      "label": "Left Column Image",
+      "id": "left_img"
     },
     {
       "type": "text",
-      "id": "heading",
-      "label": "Heading"
+      "label": "Heading",
+      "id": "head"
     },
     {
       "type": "richtext",
-      "id": "content",
-      "label": "Content"
-    }
-  ],
-  "presets": [
-    {
-      "name": "Best Quality Section"
+      "label": "Content",
+      "id": "content"
     }
   ]
 }
