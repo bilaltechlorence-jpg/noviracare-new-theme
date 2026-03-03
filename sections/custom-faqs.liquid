@@ -1,112 +1,130 @@
-{% assign meta_title = product.metafields.custom.best_quality_section_title %}
-{% assign meta_content = product.metafields.custom.best_quality_section_description %}
+{% assign question_one = product.metafields.custom.question_1 %}
+{% assign answer_one = product.metafields.custom.answer_1 %}
+{% assign question_two = product.metafields.custom.question_2 %}
+{% assign answer_two = product.metafields.custom.answer_2 %}
+{% assign question_three = product.metafields.custom.question_3 %}
+{% assign answer_three = product.metafields.custom.answer_3 %}
+{% assign question_four = product.metafields.custom.question_4 %}
+{% assign answer_four = product.metafields.custom.answer_4 %}
+{% assign question_five = product.metafields.custom.question_5 %}
+{% assign answer_five = product.metafields.custom.answer_5 %}
 
-<div class="custom_image_text_reverse"
-  {% if section.settings.background_image != blank %}
-    style="background-image:url({{ section.settings.background_image | image_url: width: 2000 }}); background-size:cover; background-position:center;"
-  {% endif %}
->
-  <div class="container">
-
-    <div class="custom_imgtext_left_col">
-      {% if section.settings.left_img != blank %}
-        <img 
-          src="{{ section.settings.left_img | image_url: width: 800 }}" 
-          alt="Section Image"
-          loading="lazy"
-        >
+{% if question_one != blank %}
+  <div class="custom_faqs_main" style="background-color:{{ section.settings.bg }}">
+    <div class="container">
+      {% if section.settings.head %}
+        <h1>{{ section.settings.head }}</h1>
       {% endif %}
+      <div class="custom_faqs_inner">
+        {% if question_one and answer_one %}
+          <div class="faq-item">
+            <div class="faq-question">
+              <div class="faq_item__question">
+                {% render 'question-mark-icon' %}
+                {{ question_one }}
+              </div>
+              <span class="faq-icon">
+                {% render 'icon-chevron' %}
+              </span>
+            </div>
+            <div class="faq-answer">
+              {{ answer_one }}
+            </div>
+          </div>
+        {% endif %}
+        {% if question_two and answer_two %}
+          <div class="faq-item">
+            <div class="faq-question">
+              <div class="faq_item__question">
+                {% render 'question-mark-icon' %}
+                {{ question_two }}
+              </div>
+              <span class="faq-icon">
+                {% render 'icon-chevron' %}
+              </span>
+            </div>
+            <div class="faq-answer">
+              {{ answer_two }}
+            </div>
+          </div>
+        {% endif %}
+
+        {% if question_three and answer_three %}
+          <div class="faq-item">
+            <div class="faq-question">
+              <div class="faq_item__question">
+                {% render 'question-mark-icon' %}
+                {{ question_three }}
+              </div>
+              <span class="faq-icon">
+                {% render 'icon-chevron' %}
+              </span>
+            </div>
+            <div class="faq-answer">
+              {{ answer_three }}
+            </div>
+          </div>
+        {% endif %}
+        {% if question_four and answer_four %}
+          <div class="faq-item">
+            <div class="faq-question">
+              <div class="faq_item__question">
+                {% render 'question-mark-icon' %}
+                {{ question_four }}
+              </div>
+              <span class="faq-icon">
+                {% render 'icon-chevron' %}
+              </span>
+            </div>
+            <div class="faq-answer">
+              {{ answer_four }}
+            </div>
+          </div>
+        {% endif %}
+
+        {% if question_five and answer_five %}
+          <div class="faq-item">
+            <div class="faq-question">
+              <div class="faq_item__question">
+                {% render 'question-mark-icon' %}
+                {{ question_five }}
+              </div>
+              <span class="faq-icon">
+                {% render 'icon-chevron' %}
+              </span>
+            </div>
+            <div class="faq-answer">
+              {{ answer_five }}
+            </div>
+          </div>
+        {% endif %}
+      </div>
     </div>
-
-    <div class="custom_img_text_rightcol">
-
-      {% if meta_title != blank %}
-        <h2>{{ meta_title }}</h2>
-      {% elsif section.settings.head != blank %}
-        <h2>{{ section.settings.head }}</h2>
-      {% endif %}
-
-      {% if meta_content != blank %}
-        <div class="cstm_imgrev_cont">
-          {{ meta_content }}
-        </div>
-      {% elsif section.settings.content != blank %}
-        <div class="cstm_imgrev_cont">
-          {{ section.settings.content }}
-        </div>
-      {% endif %}
-
-    </div>
-
   </div>
-</div>
-
-<style>
-.custom_image_text_reverse {
-  padding: 60px 0;
-}
-
-.custom_image_text_reverse .container {
-  display: flex;
-  align-items: center;
-  gap: 40px;
-}
-
-.custom_imgtext_left_col {
-  width: 50%;
-}
-
-.custom_imgtext_left_col img {
-  width: 100%;
-  height: auto;
-  display: block;
-}
-
-.custom_img_text_rightcol {
-  width: 50%;
-}
-
-@media (max-width: 768px) {
-  .custom_image_text_reverse .container {
-    flex-direction: column;
-  }
-
-  .custom_imgtext_left_col,
-  .custom_img_text_rightcol {
-    width: 100%;
-  }
-}
-</style>
-
+{% endif %}
 {% schema %}
 {
-  "name": "Custom Image Text Reverse",
+  "name": "Custom Faqs",
   "settings": [
     {
-      "type": "image_picker",
-      "id": "background_image",
-      "label": "Background Image"
-    },
-    {
-      "type": "image_picker",
-      "id": "left_img",
-      "label": "Left Column Image"
+      "type": "color",
+      "label": "Background Color",
+      "id": "bg"
     },
     {
       "type": "text",
-      "id": "head",
-      "label": "Heading"
-    },
-    {
-      "type": "richtext",
-      "id": "content",
-      "label": "Content"
-    }
-  ],
-  "presets": [
-    {
-      "name": "Custom Image Text Reverse"
+      "label": "Heading",
+      "id": "head"
     }
   ]
 }
 {% endschema %}
+
+<script>
+  document.querySelectorAll('.faq-question').forEach((item) => {
+    item.addEventListener('click', () => {
+      const parent = item.parentElement;
+      parent.classList.toggle('open');
+    });
+  });
+</script> 
