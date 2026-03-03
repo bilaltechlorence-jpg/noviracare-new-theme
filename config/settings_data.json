@@ -3597,7 +3597,7 @@
       "custom-imgtext-reverse": {
         "type": "custom-imgtext-reverse",
         "settings": {
-          "left_img": "shopify://shop_images/guaranteed__1_-removebg-preview.png",
+          "left_img": "shopify://shop_images/6.webp",
           "head": "Our 30-Day Risk-Free Guarantee",
           "content": "<p>We're confident you'll love the difference this brings to your pets’ lives, which is why we offer a 30-day money-back guarantee— no questions asked. If you're not completely satisfied, simply return it for a full refund.</p>"
         }
