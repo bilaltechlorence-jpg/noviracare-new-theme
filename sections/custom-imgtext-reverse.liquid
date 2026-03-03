@@ -1,7 +1,4 @@
-{% assign title = product.metafields.custom.best_quality_section_title %}
-{% assign content = product.metafields.custom.best_quality_section_description %}
-
-{% if title != blank or content != blank %}
+{% if section.settings.heading != blank or section.settings.content != blank %}
 
 <section class="best-quality-section"
   {% if section.settings.bg != blank %}
@@ -9,14 +6,13 @@
   {% endif %}
 >
   <div class="container">
-
     <div class="best-quality-wrapper">
 
       <!-- LEFT IMAGE -->
       {% if section.settings.left_img != blank %}
       <div class="best-quality-image">
         <img 
-          src="{{ section.settings.left_img | image_url: width: 700 }}" 
+          src="{{ section.settings.left_img | image_url: width: 800 }}" 
           alt="Best Quality Image">
       </div>
       {% endif %}
@@ -24,20 +20,19 @@
       <!-- RIGHT CONTENT -->
       <div class="best-quality-content">
 
-        {% if title != blank %}
-          <h2>{{ title }}</h2>
+        {% if section.settings.heading != blank %}
+          <h2>{{ section.settings.heading }}</h2>
         {% endif %}
 
-        {% if content != blank %}
+        {% if section.settings.content != blank %}
           <div class="best-quality-text">
-            {{ content }}
+            {{ section.settings.content }}
           </div>
         {% endif %}
 
       </div>
 
     </div>
-
   </div>
 </section>
 
@@ -87,8 +82,8 @@
   line-height: 1.6;
 }
 
-/* Mobile Responsive */
-@media(max-width: 768px){
+/* Mobile */
+@media (max-width: 768px) {
   .best-quality-wrapper {
     flex-direction: column;
   }
@@ -107,7 +102,17 @@
     {
       "type": "image_picker",
       "id": "left_img",
-      "label": "Left Image"
+      "label": "Left Column Image"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading"
+    },
+    {
+      "type": "richtext",
+      "id": "content",
+      "label": "Content"
     }
   ],
   "presets": [
