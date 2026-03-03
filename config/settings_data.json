@@ -3605,8 +3605,11 @@
       "custom-faqs": {
         "type": "custom-faqs",
         "settings": {
-          "bg": "#f4f4f4",
-          "head": "Questions? We've Got You Covered"
+          "left_title": "Our 30-Day Risk-Free Guarantee",
+          "left_content": "<p>Experience peace of mind with our 30-day money-back guarantee, ensuring your investment is completely risk-free. If you’re not satisfied within that time, simply return it for a full refund—no questions asked.</p>",
+          "right_title": "",
+          "right_image": "shopify://shop_images/guaranteed__1_-removebg-preview.png",
+          "bottom_text": ""
         }
       },
       "manual_blog_bchgbM": {
