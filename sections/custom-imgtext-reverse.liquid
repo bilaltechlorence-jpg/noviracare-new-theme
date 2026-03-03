@@ -1,49 +1,118 @@
-{% assign title = product.metafields.custom.best_quality_section_title%}
-{% assign content = product.metafields.custom.best_quality_section_description%}
+{% assign title = product.metafields.custom.best_quality_section_title %}
+{% assign content = product.metafields.custom.best_quality_section_description %}
 
-<div class="custom_image_text_reverse" style="background-image:url({{ section.settings.bg | img_url : '' }})">
+{% if title != blank or content != blank %}
+
+<section class="best-quality-section"
+  {% if section.settings.bg != blank %}
+    style="background-image: url({{ section.settings.bg | image_url }});"
+  {% endif %}
+>
   <div class="container">
-    <div class="custom_imgtext_left_col">
+
+    <div class="best-quality-wrapper">
+
+      <!-- LEFT IMAGE -->
       {% if section.settings.left_img != blank %}
-        <img src="{{ section.settings.left_img | img_url : '' }}">
+      <div class="best-quality-image">
+        <img 
+          src="{{ section.settings.left_img | image_url: width: 700 }}" 
+          alt="Best Quality Image">
+      </div>
       {% endif %}
+
+      <!-- RIGHT CONTENT -->
+      <div class="best-quality-content">
+
+        {% if title != blank %}
+          <h2>{{ title }}</h2>
+        {% endif %}
+
+        {% if content != blank %}
+          <div class="best-quality-text">
+            {{ content }}
+          </div>
+        {% endif %}
+
+      </div>
+
     </div>
-    <div class="custom_img_text_rightcol">
-      {% if title != blank %}
-        <h2>{{ title }}</h2>
-      {% endif %}
-      {% if content != blank %}
-        <div class="cstm_imgrev_cont">
-          {{ content }}
-        </div>
-      {% endif %}
-    </div>
+
   </div>
-</div>
+</section>
+
+{% endif %}
+
+<style>
+.best-quality-section {
+  padding: 80px 20px;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.best-quality-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 60px;
+  flex-wrap: wrap;
+}
+
+.best-quality-image {
+  flex: 1;
+}
+
+.best-quality-image img {
+  width: 100%;
+  border-radius: 16px;
+  display: block;
+}
+
+.best-quality-content {
+  flex: 1;
+}
+
+.best-quality-content h2 {
+  font-size: 36px;
+  margin-bottom: 20px;
+}
+
+.best-quality-text {
+  font-size: 18px;
+  line-height: 1.6;
+}
+
+/* Mobile Responsive */
+@media(max-width: 768px){
+  .best-quality-wrapper {
+    flex-direction: column;
+  }
+}
+</style>
 
 {% schema %}
 {
-  "name": "Custom Image text reverse",
+  "name": "Best Quality Section",
   "settings": [
     {
       "type": "image_picker",
-      "label": "Background Image",
-      "id": "bg"
+      "id": "bg",
+      "label": "Background Image"
     },
     {
       "type": "image_picker",
-      "label": "Left Column Image",
-      "id": "left_img"
-    },
+      "id": "left_img",
+      "label": "Left Image"
+    }
+  ],
+  "presets": [
     {
-      "type": "text",
-      "label": "Heading",
-      "id": "head"
-    },
-    {
-      "type": "richtext",
-      "label": "Content",
-      "id": "content"
+      "name": "Best Quality Section"
     }
   ]
 }
