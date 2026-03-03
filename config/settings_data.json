@@ -3621,8 +3621,10 @@
         "type": "custom-table-section",
         "settings": {
           "bg": "",
-          "head": "Effortless Everyday Relief",
-          "content": "<p>Just sit back, press play, and let soothing massage heads glide across your neck, shoulders, and back. Quiet, effortless, and designed for daily recovery.</p>"
+          "left_title": "",
+          "left_content": "",
+          "right_title": "",
+          "bottom_text": ""
         }
       },
       "custom-imgtext-reverse": {
