@@ -1,130 +1,154 @@
-{% assign question_one = product.metafields.custom.question_1 %}
-{% assign answer_one = product.metafields.custom.answer_1 %}
-{% assign question_two = product.metafields.custom.question_2 %}
-{% assign answer_two = product.metafields.custom.answer_2 %}
-{% assign question_three = product.metafields.custom.question_3 %}
-{% assign answer_three = product.metafields.custom.answer_3 %}
-{% assign question_four = product.metafields.custom.question_4 %}
-{% assign answer_four = product.metafields.custom.answer_4 %}
-{% assign question_five = product.metafields.custom.question_5 %}
-{% assign answer_five = product.metafields.custom.answer_5 %}
+<section class="novira-section">
+  <div class="novira-container">
 
-{% if question_one != blank %}
-  <div class="custom_faqs_main" style="background-color:{{ section.settings.bg }}">
-    <div class="container">
-      {% if section.settings.head %}
-        <h1>{{ section.settings.head }}</h1>
-      {% endif %}
-      <div class="custom_faqs_inner">
-        {% if question_one and answer_one %}
-          <div class="faq-item">
-            <div class="faq-question">
-              <div class="faq_item__question">
-                {% render 'question-mark-icon' %}
-                {{ question_one }}
-              </div>
-              <span class="faq-icon">
-                {% render 'icon-chevron' %}
-              </span>
-            </div>
-            <div class="faq-answer">
-              {{ answer_one }}
-            </div>
-          </div>
-        {% endif %}
-        {% if question_two and answer_two %}
-          <div class="faq-item">
-            <div class="faq-question">
-              <div class="faq_item__question">
-                {% render 'question-mark-icon' %}
-                {{ question_two }}
-              </div>
-              <span class="faq-icon">
-                {% render 'icon-chevron' %}
-              </span>
-            </div>
-            <div class="faq-answer">
-              {{ answer_two }}
-            </div>
-          </div>
-        {% endif %}
-
-        {% if question_three and answer_three %}
-          <div class="faq-item">
-            <div class="faq-question">
-              <div class="faq_item__question">
-                {% render 'question-mark-icon' %}
-                {{ question_three }}
-              </div>
-              <span class="faq-icon">
-                {% render 'icon-chevron' %}
-              </span>
-            </div>
-            <div class="faq-answer">
-              {{ answer_three }}
-            </div>
-          </div>
-        {% endif %}
-        {% if question_four and answer_four %}
-          <div class="faq-item">
-            <div class="faq-question">
-              <div class="faq_item__question">
-                {% render 'question-mark-icon' %}
-                {{ question_four }}
-              </div>
-              <span class="faq-icon">
-                {% render 'icon-chevron' %}
-              </span>
-            </div>
-            <div class="faq-answer">
-              {{ answer_four }}
-            </div>
-          </div>
-        {% endif %}
-
-        {% if question_five and answer_five %}
-          <div class="faq-item">
-            <div class="faq-question">
-              <div class="faq_item__question">
-                {% render 'question-mark-icon' %}
-                {{ question_five }}
-              </div>
-              <span class="faq-icon">
-                {% render 'icon-chevron' %}
-              </span>
-            </div>
-            <div class="faq-answer">
-              {{ answer_five }}
-            </div>
-          </div>
-        {% endif %}
+    <!-- LEFT CONTENT -->
+    <div class="novira-left">
+      <h2>{{ section.settings.left_title }}</h2>
+      <div class="novira-text">
+        {{ section.settings.left_content }}
       </div>
     </div>
+
+    <!-- RIGHT CARD -->
+    <div class="novira-right">
+      <h3>{{ section.settings.right_title }}</h3>
+
+      <ul class="novira-list">
+        {% for block in section.blocks %}
+          <li>
+            ✓ {{ block.settings.list_item }}
+          </li>
+        {% endfor %}
+      </ul>
+
+      {% if section.settings.right_image %}
+        <div class="novira-image">
+          <img src="{{ section.settings.right_image | image_url: width: 600 }}" alt="Knee Relief">
+        </div>
+      {% endif %}
+
+      <p class="novira-bottom-text">
+        {{ section.settings.bottom_text }}
+      </p>
+    </div>
+
   </div>
-{% endif %}
+</section>
+
+<style>
+.novira-section {
+  background: #f6a391;
+  padding: 60px 20px;
+}
+
+.novira-container {
+  max-width: 1200px;
+  margin: auto;
+  display: flex;
+  gap: 40px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.novira-left {
+  flex: 1;
+}
+
+.novira-left h2 {
+  font-size: 28px;
+  margin-bottom: 20px;
+}
+
+.novira-text {
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+.novira-right {
+  flex: 1;
+  background: #e57373;
+  padding: 30px;
+  border-radius: 20px;
+  color: #fff;
+}
+
+.novira-right h3 {
+  margin-bottom: 20px;
+}
+
+.novira-list {
+  list-style: none;
+  padding: 0;
+  margin-bottom: 20px;
+}
+
+.novira-list li {
+  margin-bottom: 10px;
+}
+
+.novira-image img {
+  width: 100%;
+  border-radius: 12px;
+  margin-bottom: 20px;
+}
+
+.novira-bottom-text {
+  font-weight: bold;
+}
+</style>
+
 {% schema %}
 {
-  "name": "Custom Faqs",
+  "name": "Novira Knee Section",
   "settings": [
     {
-      "type": "color",
-      "label": "Background Color",
-      "id": "bg"
+      "type": "text",
+      "id": "left_title",
+      "label": "Left Title",
+      "default": "Knee Pain? Get Relief Without Surgery"
+    },
+    {
+      "type": "richtext",
+      "id": "left_content",
+      "label": "Left Content",
+      "default": "<p>It only takes 10 minutes every day to begin relieving years worth of discomfort.</p>"
     },
     {
       "type": "text",
-      "label": "Heading",
-      "id": "head"
+      "id": "right_title",
+      "label": "Right Box Title",
+      "default": "Who Is Novira Relief Pro Massager For?"
+    },
+    {
+      "type": "image_picker",
+      "id": "right_image",
+      "label": "Right Image"
+    },
+    {
+      "type": "text",
+      "id": "bottom_text",
+      "label": "Bottom Text",
+      "default": "If knee pain is slowing you down, this was made for you."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "list",
+      "name": "List Item",
+      "settings": [
+        {
+          "type": "text",
+          "id": "list_item",
+          "label": "List Text",
+          "default": "Osteoarthritis"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Novira Knee Section"
     }
   ]
 }
 {% endschema %}
-
-<script>
-  document.querySelectorAll('.faq-question').forEach((item) => {
-    item.addEventListener('click', () => {
-      const parent = item.parentElement;
-      parent.classList.toggle('open');
-    });
-  });
-</script> 
