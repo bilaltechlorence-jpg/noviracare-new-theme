@@ -1,49 +1,156 @@
-{% assign title = product.metafields.custom.best_quality_section_title%}
-{% assign content = product.metafields.custom.best_quality_section_description%}
+<div class="custom_dynamic_section" 
+     style="background-image:url({{ section.settings.bg | image_url }});">
 
-<div class="custom_image_text_reverse" style="background-image:url({{ section.settings.bg | img_url : '' }})">
   <div class="container">
-    <div class="custom_imgtext_left_col">
-      {% if section.settings.left_img != blank %}
-        <img src="{{ section.settings.left_img | img_url : '' }}">
-      {% endif %}
-    </div>
-    <div class="custom_img_text_rightcol">
-      {% if title != blank %}
-        <h2>{{ title }}</h2>
-      {% endif %}
-      {% if content != blank %}
-        <div class="cstm_imgrev_cont">
-          {{ content }}
+
+    {% if section.settings.layout_style == 'top_image' %}
+
+      {% if section.settings.top_image != blank %}
+        <div class="custom_top_image">
+          <img src="{{ section.settings.top_image | image_url }}" alt="">
         </div>
       {% endif %}
-    </div>
+
+      {% if section.settings.heading != blank %}
+        <h2 class="custom_heading">
+          {{ section.settings.heading }}
+        </h2>
+      {% endif %}
+
+      {% if section.settings.text != blank %}
+        <div class="custom_text">
+          {{ section.settings.text }}
+        </div>
+      {% endif %}
+
+    {% else %}
+
+      <div class="custom_two_column">
+
+        <div class="custom_left">
+          {% if section.settings.left_image != blank %}
+            <img src="{{ section.settings.left_image | image_url }}" alt="">
+          {% endif %}
+        </div>
+
+        <div class="custom_right">
+          {% if section.settings.heading != blank %}
+            <h2>{{ section.settings.heading }}</h2>
+          {% endif %}
+
+          {% if section.settings.text != blank %}
+            <div class="custom_text">
+              {{ section.settings.text }}
+            </div>
+          {% endif %}
+        </div>
+
+      </div>
+
+    {% endif %}
+
   </div>
 </div>
 
+<style>
+.custom_dynamic_section {
+  padding: 60px 20px;
+  background-size: cover;
+  background-position: center;
+}
+
+.custom_top_image img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 0 auto 20px;
+}
+
+.custom_heading {
+  text-align: center;
+  margin-bottom: 15px;
+  font-size: 28px;
+  font-weight: 600;
+}
+
+.custom_text {
+  max-width: 700px;
+}
+
+.custom_two_column {
+  display: flex;
+  align-items: center;
+  gap: 40px;
+  flex-wrap: wrap;
+}
+
+.custom_left,
+.custom_right {
+  flex: 1;
+}
+
+.custom_left img {
+  max-width: 100%;
+  height: auto;
+}
+
+@media(max-width: 768px){
+  .custom_two_column {
+    flex-direction: column;
+    text-align: center;
+  }
+}
+</style>
+
 {% schema %}
 {
-  "name": "Custom Image text reverse",
+  "name": "Image & Text Layout",
   "settings": [
     {
-      "type": "image_picker",
-      "label": "Background Image",
-      "id": "bg"
+      "type": "select",
+      "id": "layout_style",
+      "label": "Select Layout",
+      "options": [
+        {
+          "value": "top_image",
+          "label": "Image on Top"
+        },
+        {
+          "value": "two_column",
+          "label": "Two Column Layout"
+        }
+      ],
+      "default": "top_image"
     },
     {
       "type": "image_picker",
-      "label": "Left Column Image",
-      "id": "left_img"
+      "id": "bg",
+      "label": "Background Image"
+    },
+    {
+      "type": "image_picker",
+      "id": "top_image",
+      "label": "Top Image"
+    },
+    {
+      "type": "image_picker",
+      "id": "left_image",
+      "label": "Left Image"
     },
     {
       "type": "text",
-      "label": "Heading",
-      "id": "head"
+      "id": "heading",
+      "label": "Heading"
     },
     {
       "type": "richtext",
-      "label": "Content",
-      "id": "content"
+      "id": "text",
+      "label": "Text Content"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Image & Text Layout"
     }
   ]
 }
