@@ -367,11 +367,11 @@ display:flex;
 align-items:center;
 gap:10px;
 margin-bottom:8px;
-font-size:16px;
+font-size:20px;
 }
 
 .check-icon{
-color:#108474;
+color:#e77b7b;
 font-weight:bold;
-font-size:18px;
+font-size:20px;
 }
