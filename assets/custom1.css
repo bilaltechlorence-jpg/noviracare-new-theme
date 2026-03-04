@@ -338,3 +338,9 @@ div#judgeme_product_reviews {
 .jm-box.jm-box--inherit-color.jm-review-item {
     padding: 20px;
 }
+
+.jm-button--primary[data-v-9640c170] {
+    background-color: #e77b7b !important;
+    color: var(--jm-btn-color, var(--jm-review-widget-button-text-color));
+    border-color: #e77b7b !important;
+}
