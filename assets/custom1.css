@@ -353,3 +353,25 @@ div#judgeme_product_reviews {
 .custom_img_text_rightcol h2 {
     font-size: 36px;
 }
+
+
+
+.included-list{
+list-style:none;
+padding:0;
+margin:0;
+}
+
+.included-list li{
+display:flex;
+align-items:center;
+gap:10px;
+margin-bottom:8px;
+font-size:16px;
+}
+
+.check-icon{
+color:#108474;
+font-weight:bold;
+font-size:18px;
+}
