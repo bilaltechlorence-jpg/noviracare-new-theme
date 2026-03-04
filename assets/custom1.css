@@ -336,14 +336,14 @@ div#judgeme_product_reviews {
 
 
 
-main .shopify-section{
-width:100%;
-}
-
+/* Move What's Included section above reviews */
 #shopify-section-custom-imgtext-reverse{
-order:1 !important;
+margin-top:-600px;
+position:relative;
+z-index:2;
 }
 
+/* add space after reviews */
 #judgeme_product_reviews{
-order:2 !important;
+margin-bottom:650px;
 }
