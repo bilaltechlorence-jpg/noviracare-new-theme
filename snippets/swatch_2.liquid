@@ -28,14 +28,14 @@
       endif
 
     when '2'
-      assign current_variant = selected_variant | default: pr_variants[1]
+      assign current_variant = selected_variant | default: pr_variants[0]
       assign bclass = 'is-selected-nt'
       if current_variant.available == false and remove_soldout and product.available
         assign current_variant = product.first_available_variant
       endif
 
     else
-      assign current_variant = pr_variants[1]
+      assign current_variant = pr_variants[0]
       assign bclass = 'is-selected-nt'
   endcase
 
