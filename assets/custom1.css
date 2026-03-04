@@ -333,3 +333,21 @@ div#judgeme_product_reviews {
     flex-wrap: nowrap;
     justify-content: center;
 }
+
+
+
+/* Parent container flex */
+main {
+display:flex;
+flex-direction:column;
+}
+
+/* What's Included first */
+#shopify-section-custom-imgtext-reverse{
+order:1;
+}
+
+/* Reviews second */
+#judgeme_product_reviews{
+order:2;
+}
