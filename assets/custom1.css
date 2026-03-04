@@ -344,3 +344,6 @@ div#judgeme_product_reviews {
     color: var(--jm-btn-color, var(--jm-review-widget-button-text-color));
     border-color: #e77b7b !important;
 }
+.jdgm-preview-badge .jdgm-star {
+    color: #e77b7b !important;
+}
