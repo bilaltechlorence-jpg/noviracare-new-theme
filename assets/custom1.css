@@ -365,3 +365,44 @@ grid-template-columns:repeat(2,1fr);
 grid-template-columns:1fr;
 }
 }
+
+/* REVIEW CARD LAYOUT */
+.jm-review-item__content{
+display:flex;
+flex-direction:column;
+}
+
+/* IMAGE FIRST */
+.jm-media-thumbnail-list__thumbnail{
+order:1;
+margin-bottom:10px;
+}
+
+.jm-media-thumbnail-list__thumbnail img{
+width:100%;
+border-radius:10px;
+}
+
+/* NAME */
+.jm-reviewer-info{
+order:2;
+}
+
+/* DATE */
+.jm-reviewer-info span{
+order:3;
+display:block;
+font-size:13px;
+color:#777;
+}
+
+/* REVIEW TEXT */
+.jm-review-content{
+order:4;
+}
+
+/* STARS LAST */
+.jm-star-rating{
+order:5;
+margin-top:8px;
+}
