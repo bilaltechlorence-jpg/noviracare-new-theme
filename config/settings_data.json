@@ -503,6 +503,19 @@
               "lb_cl": ""
             }
           },
+          "simple_3FcQAp": {
+            "type": "simple",
+            "settings": {
+              "title": "16-Head Deep",
+              "url": "shopify://products/cross-border-16-head-fascia-gun-multi-head-massage-gun-50kg-high-definition-deep-muscle-massager-customized-chinese-and-english-version",
+              "open_link": "_self",
+              "icon": "",
+              "cus_cl": false,
+              "cl": "#ec0101",
+              "lb": "",
+              "lb_cl": ""
+            }
+          },
           "simple_DNYkUR": {
             "type": "simple",
             "disabled": true,
@@ -559,6 +572,7 @@
         },
         "block_order": [
           "simple_ktxbRY",
+          "simple_3FcQAp",
           "simple_DNYkUR",
           "simple_MQm89U",
           "simple_pieeMR",
