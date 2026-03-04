@@ -336,18 +336,14 @@ div#judgeme_product_reviews {
 
 
 
-/* Parent container flex */
-main {
-display:flex;
-flex-direction:column;
+main .shopify-section{
+width:100%;
 }
 
-/* What's Included first */
 #shopify-section-custom-imgtext-reverse{
-order:1;
+order:1 !important;
 }
 
-/* Reviews second */
 #judgeme_product_reviews{
-order:2;
+order:2 !important;
 }
