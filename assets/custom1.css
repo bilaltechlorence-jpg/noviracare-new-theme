@@ -256,3 +256,70 @@ html, body {
     top: auto !important;
   }
 }
+
+
+
+
+
+/* REVIEW GRID */
+.jdgm-review-list {
+  column-count: 4;
+  column-gap: 20px;
+  max-width: 1400px;
+  margin: auto;
+}
+
+/* REVIEW CARD */
+.jdgm-review-list .jm-review-item {
+  display: inline-block;
+  width: 100%;
+  background: #f8f8f8;
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 20px;
+  break-inside: avoid;
+  border: 1px solid #e5e5e5;
+}
+
+/* REVIEW IMAGE */
+.jm-media-thumbnail-list__thumbnail img{
+  width:100%;
+  border-radius:10px;
+  margin-bottom:10px;
+}
+
+/* STAR */
+.jm-star-rating__font-icon{
+  color:#f5b301 !important;
+}
+
+/* NAME */
+.jm-reviewer-info__name{
+  font-weight:600;
+  font-size:15px;
+}
+
+/* DATE */
+.jm-reviewer-info span{
+  font-size:13px;
+  color:#777;
+}
+
+/* TEXT */
+.jm-review-content__body{
+  font-size:14px;
+  line-height:1.6;
+}
+
+/* MOBILE */
+@media (max-width: 992px){
+.jdgm-review-list{
+column-count:2;
+}
+}
+
+@media (max-width: 600px){
+.jdgm-review-list{
+column-count:1;
+}
+}
