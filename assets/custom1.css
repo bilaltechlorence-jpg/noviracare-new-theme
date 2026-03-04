@@ -323,3 +323,45 @@ column-count:2;
 column-count:1;
 }
 }
+
+/* REVIEW GRID FIX */
+.jdgm-review-list{
+display:grid !important;
+grid-template-columns: repeat(4,1fr);
+gap:20px;
+max-width:1400px;
+margin:auto;
+}
+
+/* REVIEW CARD */
+.jdgm-review-list .jm-review-item{
+background:#f8f8f8;
+border-radius:12px;
+padding:18px;
+border:1px solid #e5e5e5;
+}
+
+/* REVIEW IMAGE */
+.jm-media-thumbnail-list__thumbnail img{
+width:100%;
+border-radius:10px;
+margin-top:10px;
+}
+
+/* STAR COLOR */
+.jm-star-rating__font-icon{
+color:#f5b301 !important;
+}
+
+/* MOBILE */
+@media(max-width:1000px){
+.jdgm-review-list{
+grid-template-columns:repeat(2,1fr);
+}
+}
+
+@media(max-width:600px){
+.jdgm-review-list{
+grid-template-columns:1fr;
+}
+}
