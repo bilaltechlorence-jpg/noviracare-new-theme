@@ -261,14 +261,12 @@ html, body {
 
 
 /* REVIEW CARD STRUCTURE */
-.jdgm-review-list .jm-review-item{
-display:flex;
-flex-direction:column;
-padding:18px;
-background:#f7f7f7;
-border-radius:12px;
-border:1px solid #e5e5e5;
-margin-bottom:20px;
+.jdgm-review-list{
+display:grid !important;
+grid-template-columns: repeat(4,1fr);
+gap:20px;
+max-width:1400px;
+margin:auto;
 }
 
 /* IMAGE FIRST */
