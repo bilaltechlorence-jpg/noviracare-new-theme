@@ -335,4 +335,6 @@ div#judgeme_product_reviews {
 }
 
 
-
+.jm-box.jm-box--inherit-color.jm-review-item {
+    padding: 20px;
+}
