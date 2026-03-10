@@ -808,10 +808,9 @@
         "blocks": {
           "mb_nav-0": {
             "type": "menu",
-            "disabled": true,
             "settings": {
-              "title": "Home",
-              "url": "https://savvycart1.myshopify.com/",
+              "title": "The Rock Stepper",
+              "url": "shopify://products/cross-border-new-model-home-use-stepper-exercise-machine-for-slimming-legs-multifunctional-fitness-equipment-in-situ-climbing-exercise-machine",
               "open_link": "_self",
               "menu": "",
               "icon": "",
