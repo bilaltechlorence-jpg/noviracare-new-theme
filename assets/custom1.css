@@ -375,3 +375,9 @@ color:#e77b7b;
 font-weight:bold;
 font-size:20px;
 }
+
+
+
+html, body {
+    overflow-x: hidden!important;
+}
